@@ -18,21 +18,32 @@ EXEC Rhetos.DataMigrationUse 'Common', 'PrincipalHasRole', 'PrincipalID', 'uniqu
 EXEC Rhetos.DataMigrationUse 'Common', 'PrincipalHasRole', 'RoleID', 'uniqueidentifier';
 GO
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM _Common.Role)
+IF EXISTS (SELECT TOP 1 1 FROM _Common.Permission WHERE RoleID IS NULL AND PrincipalID IS NOT NULL)
+	AND NOT EXISTS (SELECT TOP 1 1 FROM _Common.Role)
 BEGIN
-	INSERT INTO _Common.Role (ID, Name)
-	SELECT NEWID(), pri.Name + ' role'
-	FROM _Common.Principal pri;
+	INSERT INTO
+		_Common.Role (ID, Name)
+	SELECT
+		NEWID(), pri.Name + ' role'
+	FROM
+		_Common.Principal pri
+		INNER JOIN (SELECT DISTINCT PrincipalID FROM _Common.Permission) per ON per.PrincipalID = pri.ID;
 
-	INSERT INTO _Common.PrincipalHasRole (ID, PrincipalID, RoleID)
-	SELECT NEWID(), pri.ID, r.ID
-	FROM _Common.Principal pri
-	INNER JOIN _Common.Role r ON r.Name = pri.Name + ' role';
+	INSERT INTO
+		_Common.PrincipalHasRole (ID, PrincipalID, RoleID)
+	SELECT
+		NEWID(), pri.ID, r.ID
+	FROM
+		_Common.Principal pri
+		INNER JOIN _Common.Role r ON r.Name = pri.Name + ' role';
 
-	UPDATE per
-	SET RoleID = phr.RoleID
-	FROM _Common.Permission per
-	INNER JOIN _Common.PrincipalHasRole phr ON phr.PrincipalID = per.PrincipalID;
+	UPDATE
+		per
+	SET
+		RoleID = phr.RoleID
+	FROM
+		_Common.Permission per
+		INNER JOIN _Common.PrincipalHasRole phr ON phr.PrincipalID = per.PrincipalID;
 END
 
 EXEC Rhetos.DataMigrationApplyMultiple 'Common', 'Role', 'ID, Name';
