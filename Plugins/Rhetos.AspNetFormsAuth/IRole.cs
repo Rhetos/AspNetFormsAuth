@@ -1,4 +1,5 @@
-﻿/*
+﻿using Rhetos.Dom.DefaultConcepts;
+/*
     Copyright (C) 2013 Omega software d.o.o.
 
     This file is part of Rhetos.
@@ -17,13 +18,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using System;
-using Rhetos.Dom.DefaultConcepts;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Rhetos.AspNetFormsAuth
 {
-    public interface IRoleInheritsRole : IEntity
+    public interface IRole : IEntity
     {
-        IRole Derived { get; }
-        IRole InheritsFrom { get; }
+        string Name { get; set; }
     }
 }
