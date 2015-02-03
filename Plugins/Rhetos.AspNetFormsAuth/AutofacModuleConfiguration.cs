@@ -36,10 +36,10 @@ namespace Rhetos.AspNetFormsAuth
         {
             builder.RegisterType<AuthenticationService>().InstancePerLifetimeScope();
 
-            PluginsUtility.CheckOverride<IUserInfo, AspNetUserInfo>(builder, typeof(WcfWindowsUserInfo));
+            Plugins.CheckOverride<IUserInfo, AspNetUserInfo>(builder, typeof(WcfWindowsUserInfo));
             builder.RegisterType<AspNetUserInfo>().As<IUserInfo>().InstancePerLifetimeScope();
 
-            PluginsUtility.RegisterPlugins<ISendPasswordResetToken>(builder);
+            Plugins.FindAndRegisterPlugins<ISendPasswordResetToken>(builder);
 
             base.Load(builder);
         }
