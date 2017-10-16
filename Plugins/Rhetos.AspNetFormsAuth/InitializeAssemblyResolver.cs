@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos.Utilities;
 using System;
 using System.IO;
 using System.Linq;
@@ -24,17 +25,18 @@ using System.Reflection;
 
 namespace Rhetos.AspNetFormsAuth
 {
-    public class InitializeAssemblyResolver
+    public class InitializeAssemblyResolverAndRhetos
     {
         private readonly string _relativePathToBinFolder;
 
         /// <summary>
         /// AssemblyResolver needs to be initialized as a static member, to allow other static members' initialization (from Rhetos.Utilities).
         /// </summary>
-        public InitializeAssemblyResolver(string relativePathToBinFolder)
+        public InitializeAssemblyResolverAndRhetos(string relativePathToBinFolder)
         {
             _relativePathToBinFolder = relativePathToBinFolder;
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(FindAssemblyInParentFolder);
+            Paths.InitializeRhetosServerRootPath(Path.Combine(relativePathToBinFolder, @".."));
         }
 
         /// <summary>

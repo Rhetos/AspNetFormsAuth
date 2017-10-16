@@ -18,28 +18,19 @@
 */
 
 using Rhetos.AspNetFormsAuth;
-using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Security.Principal;
-using System.Text;
-using System.Xml.Linq;
-using System.Xml.XPath;
 using WebMatrix.WebData;
 
 namespace InitAspNetDatabase
 {
     class Program
     {
-        static InitializeAssemblyResolver initializeAssemblyResolver = new InitializeAssemblyResolver("..");
+        static InitializeAssemblyResolverAndRhetos staticInitialization = new InitializeAssemblyResolverAndRhetos("..");
 
         static int Main(string[] args)
         {
-            Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\.."));
-
             string errorMessage = null;
             try
             {
