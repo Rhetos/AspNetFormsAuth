@@ -18,8 +18,10 @@
 */
 
 using Rhetos.AspNetFormsAuth;
+using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using WebMatrix.WebData;
 
@@ -27,13 +29,15 @@ namespace InitAspNetDatabase
 {
     class Program
     {
-        static InitializeAssemblyResolverAndRhetos staticInitialization = new InitializeAssemblyResolverAndRhetos("..");
+        // The exe will be placed in the subfolder: <server root>\bin\Plugins.
+        static InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
 
         static int Main(string[] args)
         {
             string errorMessage = null;
             try
             {
+                Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\.."));
                 CreateMembershipProviderTables();
             }
             catch (ApplicationException ex)

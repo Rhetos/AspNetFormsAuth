@@ -25,18 +25,17 @@ using System.Reflection;
 
 namespace Rhetos.AspNetFormsAuth
 {
-    public class InitializeAssemblyResolverAndRhetos
+    public class InitializeAssemblyResolver
     {
         private readonly string _relativePathToBinFolder;
 
         /// <summary>
         /// AssemblyResolver needs to be initialized as a static member, to allow other static members' initialization (from Rhetos.Utilities).
         /// </summary>
-        public InitializeAssemblyResolverAndRhetos(string relativePathToBinFolder)
+        public InitializeAssemblyResolver(string relativePathToBinFolder)
         {
             _relativePathToBinFolder = relativePathToBinFolder;
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(FindAssemblyInParentFolder);
-            Paths.InitializeRhetosServerRootPath(Path.Combine(relativePathToBinFolder, @".."));
         }
 
         /// <summary>

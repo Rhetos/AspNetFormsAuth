@@ -35,18 +35,134 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Configuration">
+      <HintPath>..\..\packages\Autofac.Configuration.3.3.0\lib\net40\Autofac.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.Wcf">
+      <HintPath>..\..\packages\Autofac.Wcf.3.0.1\lib\net40\Autofac.Integration.Wcf.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework">
+      <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\..\packages\DotNetZip.1.9.3\lib\net20\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.XmlTransform">
+      <HintPath>..\..\packages\Microsoft.Web.Xdt.2.1.1\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Core">
+      <HintPath>..\..\packages\NuGet.Core.2.8.3\lib\net40-Client\NuGet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess">
+      <HintPath>..\..\packages\Oracle.ManagedDataAccess.12.1.24160719\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Compiler">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Compiler.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Compiler.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Compiler.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Configuration.Autofac">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Configuration.Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.DatabaseGenerator">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.DatabaseGenerator.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.DatabaseGenerator.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.DatabaseGenerator.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Deployment">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Deployment.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Deployment.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Dom">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Dom.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Dom.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Dom.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Dsl">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Dsl.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Dsl.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Dsl.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Extensibility">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Extensibility.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Extensibility.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Extensibility.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Logging">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Logging.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Logging.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Persistence">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Persistence.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Persistence.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Persistence.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Processing">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Processing.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Processing.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Processing.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Security">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Security.Interfaces">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Security.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.TestCommon">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.TestCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Utilities">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Web">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.XmlSerialization">
+      <HintPath>..\..\packages\Rhetos.2.0.0\lib\net451\Rhetos.XmlSerialization.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WebMatrix.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="WebMatrix.Data">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.Data.2.0.20710.0\lib\net40\WebMatrix.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="WebMatrix.WebData, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="WebMatrix.WebData">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.WebData.2.0.20710.0\lib\net40\WebMatrix.WebData.dll</HintPath>
       <Private>True</Private>
     </Reference>

@@ -43,13 +43,14 @@ namespace AdminSetup
     class Program
     {
         // The exe will be placed in the subfolder: <server root>\bin\Plugins.
-        static InitializeAssemblyResolverAndRhetos staticInitialization = new InitializeAssemblyResolverAndRhetos("..");
+        static InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
 
         static int Main(string[] args)
         {
             string errorMessage = null;
             try
             {
+                Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\.."));
                 Exception createAdminUserException = null;
                 try
                 {
