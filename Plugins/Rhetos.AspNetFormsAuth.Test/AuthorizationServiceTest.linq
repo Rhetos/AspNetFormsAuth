@@ -5,6 +5,7 @@
   <Namespace>System.Linq</Namespace>
   <Namespace>System.Net</Namespace>
   <Namespace>System.Text</Namespace>
+  <Namespace>System.Threading.Tasks</Namespace>
 </Query>
 
 // const string testUserName = "u1";
@@ -12,12 +13,18 @@
 
 void Main()
 {
+	Parallel.For(0, 4, x => Test());
+}
+
+void Test()
+{
     using (var web = new CookieAwareWebClient() { BaseAddress = "http://localhost/Rhetos/" })
     {
         // Reading without logging in:
         
-        bool successful = web.DownloadString("").Contains("<title>Rhetos</title>").Dump("Read Rhetos home page");
-        if (successful) throw new Exception("Reading without logging in should fail.");
+		bool successful;
+        //successful = web.DownloadString("").Contains("<title>Rhetos</title>").Dump("Read Rhetos home page");
+        //if (successful) throw new Exception("Reading without logging in should fail.");
         
         // Log in the test user:
         

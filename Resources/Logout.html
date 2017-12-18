@@ -19,11 +19,9 @@
                                 alert('Unexpected server response: ' + data.toString());
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
-                            var msg = jqXHR.responseText
-                            try { msg = JSON.parse(msg); } catch (e) {}
-                            if (errorThrown !== 'Bad Request')
-                                msg = msg + '\n\n(' + textStatus + ' ' + errorThrown + ')';
-                            alert('ERROR:\n\n' + msg);
+                            var msg = jqXHR.responseText;
+                            try { msg = JSON.stringify(JSON.parse(msg), null, 2); } catch (e) {}
+                            alert('ERROR: ' + errorThrown + '\n\n' + msg);
                         }
                     });
          });
