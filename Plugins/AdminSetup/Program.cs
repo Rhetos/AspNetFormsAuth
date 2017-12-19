@@ -62,7 +62,17 @@ namespace AdminSetup
                     createAdminUserException = ex;
                 }
 
-                SetUpAdminAccount();
+                string password = null;
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i] == "-pass" && i < args.Length - 1)
+                    {
+                        password = args[i + 1];
+                        break;
+                    }
+                }
+
+                SetUpAdminAccount(password);
 
                 if (createAdminUserException != null)
                     ExceptionsUtility.Rethrow(createAdminUserException);
@@ -130,7 +140,7 @@ namespace AdminSetup
             }
         }
 
-        private static void SetUpAdminAccount()
+        private static void SetUpAdminAccount(string defaultPassword = null)
         {
             CheckElevatedPrivileges();
 
@@ -142,7 +152,7 @@ namespace AdminSetup
             if (id == -1)
                 throw new ApplicationException("Missing '" + adminUserName + "' user entry in Common.Principal entity. Please execute DeployPackages.exe, with AspNetFormsAuth package included, to initialize the 'admin' user entry.");
 
-            string adminPassword = InputPassword();
+            string adminPassword = string.IsNullOrWhiteSpace(defaultPassword) ? InputPassword() : defaultPassword;
 
             try
             {
