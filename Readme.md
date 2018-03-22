@@ -144,8 +144,8 @@ Generates a password reset token and sends it to the user.
 * The method does not require user authentication.
 * **NOTE:** *AspNetFormsAuth* package **does not contain** any implementation of sending  the token (by SMS or email, e.g.).
   The implementation must be provided by an additional plugin. For example:
-    - Use the [SimpleSPRTEmail](https://github.com/Rhetos/SimpleSPRTEmail) plugin package for sending token by email,
-    - or follow [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken) to implement a different sending method.
+  * Use the [SimpleSPRTEmail](https://github.com/Rhetos/SimpleSPRTEmail) plugin package for sending token by email,
+  * or follow [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken) to implement a different sending method.
 * Use `AspNetFormsAuth.SendPasswordResetToken.ExpirationInMinutes` appSettings key in `web.config` to set the token expiration timeout.
   Default value is 1440 minutes (24 hours).
   For example: `<add key="AspNetFormsAuth.SendPasswordResetToken.ExpirationInMinutes" value="60" />`.
@@ -193,10 +193,16 @@ in order for forms authentication to work.
 1. Start IIS Manager -> Select the web site -> Open "Authentication" feature.
 2. On the Authentication page **enable** *Anonymous Authentication* and *Forms Authentication*,
    **disable** *Windows Authentication* and every other.
+3. Allow IIS system accounts read access to the Rhetos server folder (here named "RhetosServer") and write access to the Logs folder ("RhetosServer\Logs"), by entering these commands to the command prompt *as administrator*:
+
+        ICACLS "RhetosServer" /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(RX)
+        ICACLS "RhetosServer" /grant "NT AUTHORITY\IUSR":(OI)(CI)(RX)
+        ICACLS "RhetosServer\Logs" /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(M)
+        ICACLS "RhetosServer\Logs" /grant "NT AUTHORITY\IUSR":(OI)(CI)(M)
 
 ### 3. Configure IIS Express
 
-*(Only if using IIS Express instead of IIS server)*
+Note: *(Only if using IIS Express instead of IIS server)*
 
 If using IIS Express, after deploying AspNetFormsAuth package, execute `SetupRhetosServer.bat`
 utility in Rhetos server's folder to automatically configure `IISExpress.config`,
@@ -307,7 +313,7 @@ Sharing the authentication cookie is useful when using separate web sites for we
 In these scenarios, sharing the forms authentication cookie between the sites will allow a single-point login for the user on any of the sites and seamless use of the cookie on any of the other sites.
 
 * In most cases, for the sites to share the authentication cookie, it is enough to have **same** `machineKey` element configuration in the `web.config`.
-For more info, see [MSDN article: Forms Authentication Across Applications](http://msdn.microsoft.com/en-us/library/eb0zx8fc.aspx).
+  For more info, see [MSDN article: Forms Authentication Across Applications](http://msdn.microsoft.com/en-us/library/eb0zx8fc.aspx).
 * If your web application uses **.NET Framework 4.5 or later** (the Rhetos server uses v4.0), set the `compatibilityMode` attribute in machine key to `Framework20SP2`.
 * If you have multiple Rhetos applications on a server and do not want to share the authentication between them, make sure to set **different** `machineKey` configuration for each site.
 
