@@ -1,6 +1,6 @@
 # AspNetFormsAuth
 
-AspNetFormsAuth is a DSL package (a plugin module) for [Rhetos development platform](https://github.com/Rhetos/Rhetos).
+AspNetFormsAuth is a plugin package for [Rhetos development platform](https://github.com/Rhetos/Rhetos).
 It provides an implementation of **ASP.NET forms authentication** to Rhetos server applications.
 
 The authentication is implemented using Microsoft's *WebMatrix SimpleMembershipProvider*,
@@ -163,12 +163,16 @@ Allows a user to set the initial password or reset the forgotten password, using
 
 ## Installation
 
-Prerequisites:
+To install this package to a Rhetos server, add it to the Rhetos server's *RhetosPackages.config* file
+and make sure the NuGet package location is listed in the *RhetosPackageSources.config* file.
 
-* AspNetFormsAuth cannot be deployed together with the obsolete **SimpleWindowsAuth**.
+* The package ID is "**Rhetos.AspNetFormsAuth**".
+  This package is available at the [NuGet.org](https://www.nuget.org/) online gallery.
+  It can be downloaded or installed directly from there.
+* For more information, see [Installing plugin packages](https://github.com/Rhetos/Rhetos/wiki/Installing-plugin-packages).
 
 Before or after deploying the AspNetFormsAuth packages, please make the following changes to the web site configuration,
-in order for forms authentication to work.
+in order for the forms authentication to work:
 
 ### 1. Modify Web.config
 
@@ -193,12 +197,12 @@ in order for forms authentication to work.
 1. Start IIS Manager -> Select the web site -> Open "Authentication" feature.
 2. On the Authentication page **enable** *Anonymous Authentication* and *Forms Authentication*,
    **disable** *Windows Authentication* and every other.
-3. Allow IIS system accounts read access to the Rhetos server folder (here named "RhetosServer") and write access to the Logs folder ("RhetosServer\Logs"), by entering these commands to the command prompt *as administrator*:
+3. Allow IIS system accounts read access to the Rhetos server folder and write access to the Rhetos logs folder (the "Logs" subfolder or directly in the Rhetos server folder, depending on the settings in *web.config*), by entering these commands to the command prompt *as administrator*, in the "RhetosServer" folder:
 
-        ICACLS "RhetosServer" /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(RX)
-        ICACLS "RhetosServer" /grant "NT AUTHORITY\IUSR":(OI)(CI)(RX)
-        ICACLS "RhetosServer\Logs" /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(M)
-        ICACLS "RhetosServer\Logs" /grant "NT AUTHORITY\IUSR":(OI)(CI)(M)
+        ICACLS . /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(RX)
+        ICACLS . /grant "NT AUTHORITY\IUSR":(OI)(CI)(RX)
+        ICACLS .\Logs /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(M)
+        ICACLS .\Logs /grant "NT AUTHORITY\IUSR":(OI)(CI)(M)
 
 ### 3. Configure IIS Express
 
@@ -243,7 +247,7 @@ All claims related to the authentication service have resource=`AspNetFormsAuth.
 
 ### Maximum failed password attempts
 
-Use entity *Commmon.AspNetFormsAuthPasswordAttemptsLimit* (*MaxInvalidPasswordAttempts*, *TimeoutInSeconds*)
+Use entity *Common.AspNetFormsAuthPasswordAttemptsLimit* (*MaxInvalidPasswordAttempts*, *TimeoutInSeconds*)
 to configure automatic account locking when a number of failed password attempts is reached.
 
 * When *MaxInvalidPasswordAttempts* limit is passed, the user's account is temporarily locked.
@@ -342,7 +346,7 @@ You may use the following C# code to generate the keys:
 
 ## Session timeout
 
-ASP.NET forms authentication ticket will expire after 30 minutes of **client incativity**, by default.
+ASP.NET forms authentication ticket will expire after 30 minutes of **client inactivity**, by default.
 To allow user to stay logged in after longer time of inactivity, add standard [ASP.NET configuration](https://msdn.microsoft.com/en-us/library/1d3t3c61(v=vs.100).aspx) option `timeout` (in minutes) in Web.config:
 
     <system.web>
@@ -396,3 +400,12 @@ Any other exception (`Rhetos.FrameworkException`, e.g.) will only be logged on t
 
 **Other:** In case of a server error, additional information on the error may be found in the Rhetos server log (`RhetosServer.log` file, by default).
 If needed, more verbose logging of the authentication service may be switched on by adding `<logger name="AspNetFormsAuth.AuthenticationService" minLevel="Trace" writeTo="TraceLog" />` in Rhetos server's `web.config`. The trace log will be written to `RhetosServerTrace.log`.
+
+## Build
+
+**Note:** This package is already available at the [NuGet.org](https://www.nuget.org/) online gallery.
+You don't need to build it from source in order to use it in your application.
+
+To build the package from source, run `Build.bat`.
+The script will pause in case of an error.
+The build output is a NuGet package in the "Install" subfolder.
