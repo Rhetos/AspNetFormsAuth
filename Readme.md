@@ -168,7 +168,7 @@ and make sure the NuGet package location is listed in the *RhetosPackageSources.
 
 * The package ID is "**Rhetos.AspNetFormsAuth**".
   This package is available at the [NuGet.org](https://www.nuget.org/) online gallery.
-  It can be downloaded or installed directly from there.
+  The Rhetos server can install the package directly from there, if the gallery is listed in *RhetosPackageSources.config* file.
 * For more information, see [Installing plugin packages](https://github.com/Rhetos/Rhetos/wiki/Installing-plugin-packages).
 
 Before or after deploying the AspNetFormsAuth packages, please make the following changes to the web site configuration,
