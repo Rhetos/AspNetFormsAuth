@@ -176,7 +176,12 @@ in order for the forms authentication to work:
 
 ### 1. Modify Web.config
 
-1. Comment out (or delete) the `security mode="TransportCredentialOnly"` elements in all bindings.
+1. Comment out or delete the **two occurrences** of the following element:
+
+        <security mode="TransportCredentialOnly">
+          <transport clientCredentialType="Windows" />
+        </security>
+
 2. Remove the `<authentication mode="Windows" />` element.
 3. Inside the `<system.web>` element add the following:
 
