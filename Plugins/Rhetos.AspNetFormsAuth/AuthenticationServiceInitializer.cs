@@ -32,6 +32,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.ServiceModel.Description;
+using System.ServiceModel.Web;
 using System.Text;
 using System.Web;
 using System.Web.Routing;
@@ -81,22 +82,28 @@ namespace Rhetos.AspNetFormsAuth
         }
     }
 
-    public class AuthenticationServiceHost : ServiceHost
+    public class AuthenticationServiceHost : WebServiceHost
     {
-        private Type _serviceType;
-
         public AuthenticationServiceHost(Type serviceType, Uri[] baseAddresses)
-            : base(serviceType, baseAddresses)
-        {
-            _serviceType = serviceType;
-        }
+            : base(serviceType, baseAddresses) { }
 
         protected override void OnOpening()
         {
+            var setupDefaultBindingSizes = Description.Endpoints.Count == 0;
+            // WebServiceHost will automatically create HTTP and HTTPS REST-like endpoints/binding/behaviours pairs, if service endpoint/binding/behaviour configuration is empty 
+            // After OnOpening setup, we will setup default binding sizes, if needed
             base.OnOpening();
 
-            this.AddServiceEndpoint(_serviceType, new WebHttpBinding("rhetosWebHttpBinding"), string.Empty);
-            ((ServiceEndpoint)(Description.Endpoints.Where(e => e.Binding is WebHttpBinding).Single())).Behaviors.Add(new WebHttpBehavior());
+            if (setupDefaultBindingSizes)
+            {
+                const int sizeInBytes = 209715200;
+                foreach (var binding in Description.Endpoints.Select(x => x.Binding as WebHttpBinding))
+                {
+                    binding.MaxReceivedMessageSize = sizeInBytes;
+                    binding.ReaderQuotas.MaxArrayLength = sizeInBytes;
+                    binding.ReaderQuotas.MaxStringContentLength = sizeInBytes;
+                }
+            }
 
             if (Description.Behaviors.Find<Rhetos.Web.JsonErrorServiceBehavior>() == null)
                 Description.Behaviors.Add(new Rhetos.Web.JsonErrorServiceBehavior());
