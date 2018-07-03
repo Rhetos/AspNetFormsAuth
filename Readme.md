@@ -284,6 +284,29 @@ RegularExpression|RuleDescription
 `[A-Z]`          | The password must contain at least one uppercase letters.
 `\W`             | The password must contain at least one special character (not a letter or a digit).
 
+### Overriding IIS binding configuration
+
+WebServiceHost will automatically create HTTP and HTTPS REST-like endpoint/binding/behavior pairs if service endpoint/binding/behavior configuration is empty.
+
+If you need to override default behavior (i.e. enable only HTTPS), you need to add following in `services` section:
+
+```XML
+<service name="Rhetos.AspNetFormsAuth.AuthenticationService">
+  <clear />
+  <endpoint binding="webHttpBinding" bindingConfiguration="rhetosWebHttpsBinding" contract="Rhetos.AspNetFormsAuth.AuthenticationService" />
+</service>
+```
+
+Also, you need to define new `webHttpBinding` `binding` item:
+
+
+```XML
+<binding name="rhetosWebHttpsBinding" maxReceivedMessageSize="209715200">
+  <security mode="Transport" />
+  <readerQuotas maxArrayLength="209715200" maxStringContentLength="209715200" />
+</binding>
+```
+
 ## Uninstallation
 
 When returning Rhetos server from Forms Authentication back to **Windows Authentication**, the following configuration changes should be done:
