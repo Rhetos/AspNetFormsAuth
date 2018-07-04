@@ -10,27 +10,43 @@ to implement its own authentication or security mechanisms.
 
 ## Table of contents
 
-1. [Features](#features)
-2. [Authentication service API](#authentication-service-api)
-    * [Login](#login)
-    * [Logout](#logout)
-    * [SetPassword](#setpassword)
-    * [ChangeMyPassword](#changemypassword)
-    * [UnlockUser](#unlockuser)
-    * [GeneratePasswordResetToken](#generatepasswordresettoken)
-    * [SendPasswordResetToken](#sendpasswordresettoken)
-    * [ResetPassword](#resetpassword)
-3. [Installation](#installation)
-4. [Configuration](#configuration)
-    * ["admin" user](#admin-user)
-    * [Permissions and claims](#permissions-and-claims)
-    * [Maximum failed password attempts](#maximum-failed-password-attempts)
-    * [Password strength policy](#password-strength-policy)
-5. [Uninstallation](#uninstallation)
-6. [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
-7. [Session timeout](#session-timeout)
-8. [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
-9. [Troubleshooting](#troubleshooting)
+- [AspNetFormsAuth](#aspnetformsauth)
+  - [Table of contents](#table-of-contents)
+  - [Features](#features)
+    - [Authentication](#authentication)
+    - [Common administration activities](#common-administration-activities)
+    - [Forgot password](#forgot-password)
+    - [Technical notes](#technical-notes)
+    - [Simple administration GUI](#simple-administration-gui)
+  - [Authentication service API](#authentication-service-api)
+    - [Login](#login)
+    - [Logout](#logout)
+    - [SetPassword](#setpassword)
+    - [ChangeMyPassword](#changemypassword)
+    - [UnlockUser](#unlockuser)
+    - [GeneratePasswordResetToken](#generatepasswordresettoken)
+    - [SendPasswordResetToken](#sendpasswordresettoken)
+    - [ResetPassword](#resetpassword)
+  - [Installation](#installation)
+    - [1. Modify Web.config](#1-modify-webconfig)
+    - [2. Configure IIS](#2-configure-iis)
+    - [3. Configure IIS Express](#3-configure-iis-express)
+    - [4. Set up HTTPS](#4-set-up-https)
+  - [Configuration](#configuration)
+    - ["admin" user](#%22admin%22-user)
+    - [Permissions and claims](#permissions-and-claims)
+    - [Maximum failed password attempts](#maximum-failed-password-attempts)
+    - [Password strength policy](#password-strength-policy)
+    - [Overriding IIS binding configuration](#overriding-iis-binding-configuration)
+  - [Uninstallation](#uninstallation)
+    - [Modify Web.config](#modify-webconfig)
+    - [Configure IIS](#configure-iis)
+  - [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
+  - [Session timeout](#session-timeout)
+  - [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
+    - [Custom implementation](#custom-implementation)
+  - [Troubleshooting](#troubleshooting)
+  - [Build](#build)
 
 ## Features
 
@@ -178,24 +194,28 @@ in order for the forms authentication to work:
 
 1. Comment out or delete the **two occurrences** of the following element:
 
-        <security mode="TransportCredentialOnly">
-          <transport clientCredentialType="Windows" />
-        </security>
+    ```XML
+    <security mode="TransportCredentialOnly">
+      <transport clientCredentialType="Windows" />
+    </security>
+    ```
 
 2. Remove the `<authentication mode="Windows" />` element.
 3. Inside the `<system.web>` element add the following:
 
-        <authentication mode="Forms" />
-        <roleManager enabled="true" />
-        <membership defaultProvider="SimpleMembershipProvider">
-          <providers>
-            <clear />
-            <add name="SimpleMembershipProvider" type="WebMatrix.WebData.SimpleMembershipProvider, WebMatrix.WebData" />
-          </providers>
-        </membership>
-        <authorization>
-          <deny users="?" />
-        </authorization>
+    ```XML
+    <authentication mode="Forms" />
+    <roleManager enabled="true" />
+    <membership defaultProvider="SimpleMembershipProvider">
+      <providers>
+        <clear />
+        <add name="SimpleMembershipProvider" type="WebMatrix.WebData.SimpleMembershipProvider, WebMatrix.WebData" />
+      </providers>
+    </membership>
+    <authorization>
+      <deny users="?" />
+    </authorization>
+    ```
 
 ### 2. Configure IIS
 
@@ -219,12 +239,14 @@ utility in Rhetos server's folder to automatically configure `IISExpress.config`
 or manually apply the following lines in IISExpress configuration file inside `system.webServer` element
 or inside `location / system.webServer` (usually at the end of the file):
 
-    <security>
-        <authentication>
-            <anonymousAuthentication enabled="false" />
-            <windowsAuthentication enabled="true" />
-        </authentication>
-    </security>
+```XML
+<security>
+    <authentication>
+        <anonymousAuthentication enabled="false" />
+        <windowsAuthentication enabled="true" />
+    </authentication>
+</security>
+```
 
 ### 4. Set up HTTPS
 
@@ -261,9 +283,8 @@ to configure automatic account locking when a number of failed password attempts
   If the value is not set or 0, the account will be locked permanently.
 * Administrator may use [`UnlockUser`](#unlockuser) method to unlock the account, or wait for *TimeoutInSeconds*.
 * Multiple limits may be entered. An example with two entries:
-
-> After 3 failed attempts, the account is temporarily locked for 120 seconds;
-> after 10 failed attempts, the account is locked until *admin* unlocks it manually (timeout=0).
+  * After 3 failed attempts, the account is temporarily locked for 120 seconds.
+  * After 10 failed attempts, the account is locked until *admin* unlocks it manually (timeout=0).
 
 ### Password strength policy
 
@@ -299,7 +320,6 @@ If you need to override default behavior (i.e. enable only HTTPS), you need to a
 
 Also, you need to define new `webHttpBinding` `binding` item:
 
-
 ```XML
 <binding name="rhetosWebHttpsBinding" maxReceivedMessageSize="209715200">
   <security mode="Transport" />
@@ -315,23 +335,27 @@ When returning Rhetos server from Forms Authentication back to **Windows Authent
 
 1. Add (or uncomment) the following element inside all `<binding ...>` elements:
 
-        <security mode="TransportCredentialOnly">
-            <transport clientCredentialType="Windows" />
-        </security>
+    ```XML
+    <security mode="TransportCredentialOnly">
+        <transport clientCredentialType="Windows" />
+    </security>
+    ```
 
 2. Inside `<system.web>` remove following elements:
 
-        <authentication mode="Forms" />
-        <roleManager enabled="true" />
-        <membership defaultProvider="SimpleMembershipProvider">
-          <providers>
-            <clear />
-            <add name="SimpleMembershipProvider" type="WebMatrix.WebData.SimpleMembershipProvider, WebMatrix.WebData" />
-          </providers>
-        </membership>
-        <authorization>
-          <deny users="?" />
-        </authorization>
+    ```XML
+    <authentication mode="Forms" />
+    <roleManager enabled="true" />
+    <membership defaultProvider="SimpleMembershipProvider">
+      <providers>
+        <clear />
+        <add name="SimpleMembershipProvider" type="WebMatrix.WebData.SimpleMembershipProvider, WebMatrix.WebData" />
+      </providers>
+    </membership>
+    <authorization>
+      <deny users="?" />
+    </authorization>
+    ```
 
 3. Inside `<system.web>` add the `<authentication mode="Windows" />` element.
 
@@ -342,47 +366,51 @@ When returning Rhetos server from Forms Authentication back to **Windows Authent
 
 ## Sharing the authentication across web applications
 
-Sharing the authentication cookie is useful when using separate web sites for web pages and application services, or when using multiple sites for load balancing.
-In these scenarios, sharing the forms authentication cookie between the sites will allow a single-point login for the user on any of the sites and seamless use of the cookie on any of the other sites.
+Sharing the authentication cookie is useful when using separate web applications for web pages and application services, or when using multiple servers for load balancing.
+In these scenarios, sharing the forms authentication cookie between the sites will allow a single-point login for the user on any of the sites and seamless use of that cookie on the other sites.
 
-* In most cases, for the sites to share the authentication cookie, it is enough to have **same** `machineKey` element configuration in the `web.config`.
-  For more info, see [MSDN article: Forms Authentication Across Applications](http://msdn.microsoft.com/en-us/library/eb0zx8fc.aspx).
-* If your web application uses **.NET Framework 4.5 or later** (the Rhetos server uses v4.0), set the `compatibilityMode` attribute in machine key to `Framework20SP2`.
-* If you have multiple Rhetos applications on a server and do not want to share the authentication between them, make sure to set **different** `machineKey` configuration for each site.
+In most cases, for the web applications to share the authentication cookie, it is enough to have the **same** `machineKey` element configuration in the `web.config`.
+For more background info, see [MSDN article: Forms Authentication Across Applications](http://msdn.microsoft.com/en-us/library/eb0zx8fc.aspx).
 
-The machine key in `web.config` may have the following format:
+Steps:
 
-    <machineKey
-        validationKey="4F579A4589E986E7AF4D11767160DFBCF15A733F285EEF31B6DD26C7D7E9A8D5"
-        decryptionKey="73080E3328B61DC59DE2E3F7FFCA11E2706D62F7BF162E5529728F2C448D8269"
-        validation="HMACSHA256"
-        compatibilityMode="Framework20SP2" />
+1. Generate a new machine key
+    - Use Validation method: HMACSHA256, HMACSHA384, or HMACSHA512 (SHA1, MD5 and 3DES are obsolete).
+    - Use Encryption method: AES (DES and 3DES are obsolete).
+    - See [how to](https://www.codeproject.com/Articles/221889/How-to-Generate-Machine-Key-in-IIS).
+2. Find and copy the machine key element from the application's `web.config` file to other web applications.
 
-It is important to generate new validationKey and decryptionKey for every deployment.
-You may use the following C# code to generate the keys:
+For security reasons, it is important to generate the new validationKey and decryptionKey **for each deployment environment**.
+If you have multiple Rhetos applications on a server and do not want to share the authentication between them, make sure to generate different machine keys.
 
-    void Main()
-    {
-      int len = 64;
-      byte[] buff = new byte[len/2];
-      var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();
-      rng.GetBytes(buff);
-      StringBuilder sb = new StringBuilder(len);
-      for (int i=0; i<buff.Length; i++)
-        sb.Append(string.Format("{0:X2}", buff[i]));
-      Console.WriteLine(sb.ToString());
-    }
+Alternatively, you may use the following C# code to generate the keys:
+
+```C#
+void Main()
+{
+  int len = 64;
+  byte[] buff = new byte[len/2];
+  var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();
+  rng.GetBytes(buff);
+  StringBuilder sb = new StringBuilder(len);
+  for (int i=0; i<buff.Length; i++)
+    sb.Append(string.Format("{0:X2}", buff[i]));
+  Console.WriteLine(sb.ToString());
+}
+```
 
 ## Session timeout
 
 ASP.NET forms authentication ticket will expire after 30 minutes of **client inactivity**, by default.
 To allow user to stay logged in after longer time of inactivity, add standard [ASP.NET configuration](https://msdn.microsoft.com/en-us/library/1d3t3c61(v=vs.100).aspx) option `timeout` (in minutes) in Web.config:
 
-    <system.web>
-         <authentication mode="Forms">
-           <forms timeout="50000000"/>
-         </authentication>
-    </system.web>
+```XML
+<system.web>
+     <authentication mode="Forms">
+       <forms timeout="50000000"/>
+     </authentication>
+</system.web>
+```
 
 ## Implementing SendPasswordResetToken
 
@@ -400,11 +428,13 @@ from `Rhetos.AspNetFormsAuth.Interfaces.dll`.
 The class must use `Export` attribute to register the plugin implementation.
 For example:
 
-    [Export(typeof(ISendPasswordResetToken))]
-    public class EmailSender : ISendPasswordResetToken
-    {
-        ...
-    }
+```C#
+[Export(typeof(ISendPasswordResetToken))]
+public class EmailSender : ISendPasswordResetToken
+{
+    ...
+}
+```
 
 The `AdditionalClientInfo` parameter of web service method `/SendPasswordResetToken` will be provided to the implementation function.
 The parameter may contain answers to security questions, preferred method of communication or any similar user provided information
