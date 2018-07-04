@@ -8,45 +8,43 @@ with recommended security best practices such as password salting and hashing.
 Implementation fully depends on SimpleMembershipProvider; AspNetFormsAuth project does not try
 to implement its own authentication or security mechanisms.
 
-## Table of contents
+Table of contents:
 
-- [AspNetFormsAuth](#aspnetformsauth)
-  - [Table of contents](#table-of-contents)
-  - [Features](#features)
-    - [Authentication](#authentication)
-    - [Common administration activities](#common-administration-activities)
-    - [Forgot password](#forgot-password)
-    - [Technical notes](#technical-notes)
-    - [Simple administration GUI](#simple-administration-gui)
-  - [Authentication service API](#authentication-service-api)
-    - [Login](#login)
-    - [Logout](#logout)
-    - [SetPassword](#setpassword)
-    - [ChangeMyPassword](#changemypassword)
-    - [UnlockUser](#unlockuser)
-    - [GeneratePasswordResetToken](#generatepasswordresettoken)
-    - [SendPasswordResetToken](#sendpasswordresettoken)
-    - [ResetPassword](#resetpassword)
-  - [Installation](#installation)
-    - [1. Modify Web.config](#1-modify-webconfig)
-    - [2. Configure IIS](#2-configure-iis)
-    - [3. Configure IIS Express](#3-configure-iis-express)
-    - [4. Set up HTTPS](#4-set-up-https)
-  - [Configuration](#configuration)
-    - ["admin" user](#%22admin%22-user)
-    - [Permissions and claims](#permissions-and-claims)
-    - [Maximum failed password attempts](#maximum-failed-password-attempts)
-    - [Password strength policy](#password-strength-policy)
-    - [Overriding IIS binding configuration](#overriding-iis-binding-configuration)
-  - [Uninstallation](#uninstallation)
-    - [Modify Web.config](#modify-webconfig)
-    - [Configure IIS](#configure-iis)
-  - [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
-  - [Session timeout](#session-timeout)
-  - [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
-    - [Custom implementation](#custom-implementation)
-  - [Troubleshooting](#troubleshooting)
-  - [Build](#build)
+* [AspNetFormsAuth](#aspnetformsauth)
+  * [Features](#features)
+    * [Authentication](#authentication)
+    * [Common administration activities](#common-administration-activities)
+    * [Forgot password](#forgot-password)
+    * [Simple administration GUI](#simple-administration-gui)
+  * [Authentication service API](#authentication-service-api)
+    * [Login](#login)
+    * [Logout](#logout)
+    * [SetPassword](#setpassword)
+    * [ChangeMyPassword](#changemypassword)
+    * [UnlockUser](#unlockuser)
+    * [GeneratePasswordResetToken](#generatepasswordresettoken)
+    * [SendPasswordResetToken](#sendpasswordresettoken)
+    * [ResetPassword](#resetpassword)
+  * [Installation](#installation)
+    * [1. Modify Web.config](#1-modify-webconfig)
+    * [2. Configure IIS](#2-configure-iis)
+    * [3. Configure IIS Express](#3-configure-iis-express)
+    * [4. Set up HTTPS](#4-set-up-https)
+  * [Configuration](#configuration)
+    * [Set the *admin* user password](#set-the-admin-user-password)
+    * [Permissions and claims](#permissions-and-claims)
+    * [Maximum failed password attempts](#maximum-failed-password-attempts)
+    * [Password strength policy](#password-strength-policy)
+    * [Overriding IIS binding configuration](#overriding-iis-binding-configuration)
+  * [Uninstallation](#uninstallation)
+    * [Modify Web.config](#modify-webconfig)
+    * [Configure IIS](#configure-iis)
+  * [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
+  * [Session timeout](#session-timeout)
+  * [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
+    * [Custom implementation](#custom-implementation)
+  * [Troubleshooting](#troubleshooting)
+  * [Build](#build)
 
 ## Features
 
@@ -81,10 +79,6 @@ There are two recommended ways of implementing *forgot password* functionality w
   the password reset token and send it to the user. In order to use this method,
   an implementation of sending the token (by SMS or email, e.g.) should be provided by an additional plugin
   (see [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)).
-
-### Technical notes
-
-* AspNetFormsAuth packages will automatically import all permissions from the obsolete SimpleWindowsAuth package, if used before.
 
 ### Simple administration GUI
 
@@ -260,13 +254,15 @@ in development or QA environment.
 
 ## Configuration
 
-### "admin" user
+### Set the *admin* user password
 
-When deploying the AspNetFormsAuth packages, it will automatically create
+Note: When deploying the AspNetFormsAuth packages, it will automatically create
 the *admin* user account and *SecurityAdministrator* role, add the account to the role
 and give it necessary permissions (claims) for all authentication service methods.
 
-1. After deployment, **run the utility** `\bin\Plugins\AdminSetup.exe` to initialize the *admin* user's password.
+After deployment:
+
+1. Run the Rhetos utility `bin\Plugins\AdminSetup.exe` to initialize the *admin* user's password.
 
 ### Permissions and claims
 
@@ -375,9 +371,9 @@ For more background info, see [MSDN article: Forms Authentication Across Applica
 Steps:
 
 1. Generate a new machine key
-    - Use Validation method: HMACSHA256, HMACSHA384, or HMACSHA512 (SHA1, MD5 and 3DES are obsolete).
-    - Use Encryption method: AES (DES and 3DES are obsolete).
-    - See [how to](https://www.codeproject.com/Articles/221889/How-to-Generate-Machine-Key-in-IIS).
+    * Use Validation method: HMACSHA256, HMACSHA384, or HMACSHA512 (SHA1, MD5 and 3DES are obsolete).
+    * Use Encryption method: AES (DES and 3DES are obsolete).
+    * See [how to](https://www.codeproject.com/Articles/221889/How-to-Generate-Machine-Key-in-IIS).
 2. Find and copy the machine key element from the application's `web.config` file to other web applications.
 
 For security reasons, it is important to generate the new validationKey and decryptionKey **for each deployment environment**.
