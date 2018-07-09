@@ -23,6 +23,7 @@ using Rhetos.Configuration.Autofac;
 using Rhetos.Dom.DefaultConcepts;
 using Rhetos.Extensibility;
 using Rhetos.Logging;
+using Rhetos.Persistence;
 using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
@@ -124,15 +125,38 @@ namespace AdminSetup
         private static void CreateAdminUserAndPermissions()
         {
             string oldDirectory = Directory.GetCurrentDirectory();
+            Exception originalException = null;
             try
             {
                 Directory.SetCurrentDirectory(Paths.RhetosServerRootPath);
                 using (var container = CreateRhetosContainer())
                 {
-                    var repositories = container.Resolve<GenericRepositories>();
-                    ConsoleLogger.MinLevel = EventType.Info;
-                    AuthenticationDatabaseInitializer.CreateAdminUserAndPermissions(repositories);
+                    try
+                    {
+                        var repositories = container.Resolve<GenericRepositories>();
+                        ConsoleLogger.MinLevel = EventType.Info;
+                        AuthenticationDatabaseInitializer.CreateAdminUserAndPermissions(repositories);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Some exceptions result with invalid SQL transaction state that results with another exception on disposal of this 'using' block.
+                        // The original exception is logged here to make sure that it is not overridden;
+                        originalException = ex;
+
+                        container.Resolve<IPersistenceTransaction>().DiscardChanges();
+                        ExceptionsUtility.Rethrow(ex);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                if (originalException != null && ex != originalException)
+                {
+                    Console.WriteLine("Error on cleanup: " + ex.ToString());
+                    ExceptionsUtility.Rethrow(originalException);
+                }
+                else
+                    ExceptionsUtility.Rethrow(ex);
             }
             finally
             {

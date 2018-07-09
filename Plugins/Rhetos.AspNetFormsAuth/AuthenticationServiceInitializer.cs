@@ -17,23 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Autofac.Features.Indexed;
-using Rhetos.Dom;
-using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Extensibility;
-using Rhetos.Logging;
-using Rhetos.Processing;
-using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
-using System.ServiceModel.Description;
 using System.ServiceModel.Web;
-using System.Text;
 using System.Web;
 using System.Web.Routing;
 using WebMatrix.WebData;
