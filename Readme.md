@@ -371,29 +371,13 @@ For more background info, see [MSDN article: Forms Authentication Across Applica
 Steps:
 
 1. Generate a new machine key:
-    * Use Validation method: HMACSHA256, HMACSHA384, or HMACSHA512 (SHA1, MD5 and 3DES are obsolete).
-    * Use Encryption method: AES (DES and 3DES are obsolete).
+    * Select *Validation method*: HMACSHA256, HMACSHA384, or HMACSHA512 (SHA1, MD5 and 3DES are obsolete).
+    * Select *Encryption method*: AES (DES and 3DES are obsolete).
     * See [how to](https://www.codeproject.com/Articles/221889/How-to-Generate-Machine-Key-in-IIS).
-2. Copy the machine key values to other web applications (using the IIS Manager, or copy the `machineKey` element in *web.config*).
+2. Copy the machine key values to other web applications in the same deployment environment (using the IIS Manager, or copy the `machineKey` element in *web.config*).
 
 For security reasons, it is important to generate the new validationKey and decryptionKey **for each deployment environment**.
 If you have multiple Rhetos applications on a single server and do not want to share the authentication between them, make sure to generate different machine keys.
-
-Alternatively, you may use the following C# code to generate the keys:
-
-```C#
-void Main()
-{
-  int len = 64;
-  byte[] buff = new byte[len/2];
-  var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();
-  rng.GetBytes(buff);
-  StringBuilder sb = new StringBuilder(len);
-  for (int i=0; i<buff.Length; i++)
-    sb.Append(string.Format("{0:X2}", buff[i]));
-  Console.WriteLine(sb.ToString());
-}
-```
 
 ## Session timeout
 
