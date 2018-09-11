@@ -17,9 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Dom.DefaultConcepts;
 using Rhetos.Logging;
-using Rhetos.Persistence;
 using Rhetos.Utilities;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -33,74 +31,33 @@ namespace Rhetos.AspNetFormsAuth
     [Export(typeof(Rhetos.Extensibility.IServerInitializer))]
     public class AuthenticationDatabaseInitializer : Rhetos.Extensibility.IServerInitializer
     {
-        private readonly GenericRepositories _repositories;
         private readonly ILogger _logger;
-        private readonly IPersistenceTransaction _persistenceTransaction;
 
-        public AuthenticationDatabaseInitializer(
-            GenericRepositories repositories,
-            ILogProvider logProvider,
-            IPersistenceTransaction persistenceTransaction)
+        public AuthenticationDatabaseInitializer(ILogProvider logProvider)
         {
-            _repositories = repositories;
-            _logger = logProvider.GetLogger("AuthenticationDatabaseInitializer");
-            _persistenceTransaction = persistenceTransaction;
+            _logger = logProvider.GetLogger(GetType().Name);
         }
 
         public const string AdminUserName = "admin";
         public const string AdminRoleName = "SecurityAdministrator";
 
-        public void Initialize()
-        {
-            CreateAdminUserAndPermissions(_repositories);
-            InitializeAspNetDatabase();
-        }
-
-        public static void CreateAdminUserAndPermissions(GenericRepositories repositories)
-        {
-            var adminPrincipal = repositories.CreateInstance<IPrincipal>();
-            adminPrincipal.Name = AdminUserName;
-            repositories.InsertOrReadId(adminPrincipal, item => item.Name);
-
-            var adminRole = repositories.CreateInstance<IRole>();
-            adminRole.Name = AdminRoleName;
-            repositories.InsertOrReadId(adminRole, item => item.Name);
-
-            var adminPrincipalHasRole = repositories.CreateInstance<IPrincipalHasRole>();
-            adminPrincipalHasRole.PrincipalID = adminPrincipal.ID;
-            adminPrincipalHasRole.RoleID = adminRole.ID;
-            repositories.InsertOrReadId(adminPrincipalHasRole, item => new { PrincipalID = item.PrincipalID, RoleID = item.RoleID });
-
-            foreach (var securityClaim in AuthenticationServiceClaims.GetDefaultAdminClaims())
-            {
-                var commonClaim = repositories.CreateInstance<ICommonClaim>();
-                commonClaim.ClaimResource = securityClaim.Resource;
-                commonClaim.ClaimRight = securityClaim.Right;
-                repositories.InsertOrReadId(commonClaim, item => new { item.ClaimResource, item.ClaimRight });
-
-                var permission = repositories.CreateInstance<IRolePermission>();
-                permission.RoleID = adminRole.ID;
-                permission.ClaimID = commonClaim.ID;
-                permission.IsAuthorized = true;
-                repositories.InsertOrUpdateReadId(permission, item => new { item.RoleID, item.ClaimID }, item => item.IsAuthorized);
-            }
-        }
-
-        public IEnumerable<string> Dependencies
-        {
-            get { return null; }
-        }
+        public IEnumerable<string> Dependencies => new[] { typeof(AdminUserInitializer).FullName };
 
         /// <summary>
-        /// The initialization is placed in a separate application, because the SimpleMembershipProvider functions
+        /// NOTE 1:
+        /// The data initialization is split into two separate IServerInitializer implementations:
+        /// <see cref="AuthenticationDatabaseInitializer"/> and <see cref="AdminUserInitializer"/>, because
+        /// each Rhetos data initializer is executed in a separate SQL connection that is closed before
+        /// the next initializer is execute. Otherwise, database locking would occur between this two initializers
+        /// and block the deployment process.
+        /// 
+        /// NOTE 2:
+        /// The initialization is placed in a separate external application, because the SimpleMembershipProvider functions
         /// require some configuration data in app.config file. The changes in app.config cannot be added as a plugin for
         /// DeployPackages.exe.
         /// </summary>
-        private void InitializeAspNetDatabase()
+        public void Initialize()
         {
-            // Committing the inserted user data so it can be used by InitAspNetDatabase.exe.
-            _persistenceTransaction.CommitAndReconnect();
-
             var path = Path.Combine(Paths.PluginsFolder, @"InitAspNetDatabase.exe");
             ExecuteApplication(path, "/nopause");
         }

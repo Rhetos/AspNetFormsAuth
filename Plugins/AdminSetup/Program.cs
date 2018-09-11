@@ -44,7 +44,7 @@ namespace AdminSetup
     class Program
     {
         // The exe will be placed in the subfolder: <server root>\bin\Plugins.
-        static InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
+        static readonly InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
 
         static int Main(string[] args)
         {
@@ -135,7 +135,7 @@ namespace AdminSetup
                     {
                         var repositories = container.Resolve<GenericRepositories>();
                         ConsoleLogger.MinLevel = EventType.Info;
-                        AuthenticationDatabaseInitializer.CreateAdminUserAndPermissions(repositories);
+                        new AdminUserInitializer(repositories).Initialize();
                     }
                     catch (Exception ex)
                     {

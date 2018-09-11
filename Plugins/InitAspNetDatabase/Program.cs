@@ -30,7 +30,7 @@ namespace InitAspNetDatabase
     class Program
     {
         // The exe will be placed in the subfolder: <server root>\bin\Plugins.
-        static InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
+        static readonly InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
 
         static int Main(string[] args)
         {

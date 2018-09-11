@@ -193,8 +193,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AspNetUserInfo.cs" />
     <Compile Include="AuthenticationDatabaseInitializer.cs" />
+    <Compile Include="AspNetUserInfo.cs" />
+    <Compile Include="AdminUserInitializer.cs" />
     <Compile Include="AuthenticationServiceClaims.cs" />
     <Compile Include="AuthenticationServiceInitializer.cs" />
     <Compile Include="CancelUnauthorizedClientRedirection.cs" />
