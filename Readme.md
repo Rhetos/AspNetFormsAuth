@@ -10,41 +10,40 @@ to implement its own authentication or security mechanisms.
 
 Table of contents:
 
-* [AspNetFormsAuth](#aspnetformsauth)
-  * [Features](#features)
-    * [Authentication](#authentication)
-    * [Common administration activities](#common-administration-activities)
-    * [Forgot password](#forgot-password)
-    * [Simple administration GUI](#simple-administration-gui)
-  * [Authentication service API](#authentication-service-api)
-    * [Login](#login)
-    * [Logout](#logout)
-    * [SetPassword](#setpassword)
-    * [ChangeMyPassword](#changemypassword)
-    * [UnlockUser](#unlockuser)
-    * [GeneratePasswordResetToken](#generatepasswordresettoken)
-    * [SendPasswordResetToken](#sendpasswordresettoken)
-    * [ResetPassword](#resetpassword)
-  * [Installation](#installation)
-    * [1. Modify Web.config](#1-modify-webconfig)
-    * [2. Configure IIS](#2-configure-iis)
-    * [3. Configure IIS Express](#3-configure-iis-express)
-    * [4. Set up HTTPS](#4-set-up-https)
-  * [Configuration](#configuration)
-    * [Set the *admin* user password](#set-the-admin-user-password)
-    * [Permissions and claims](#permissions-and-claims)
-    * [Maximum failed password attempts](#maximum-failed-password-attempts)
-    * [Password strength policy](#password-strength-policy)
-    * [Overriding IIS binding configuration](#overriding-iis-binding-configuration)
-  * [Uninstallation](#uninstallation)
-    * [Modify Web.config](#modify-webconfig)
-    * [Configure IIS](#configure-iis)
-  * [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
-  * [Session timeout](#session-timeout)
-  * [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
-    * [Custom implementation](#custom-implementation)
-  * [Troubleshooting](#troubleshooting)
-  * [Build](#build)
+1. [Features](#features)
+   1. [Authentication](#authentication)
+   2. [Common administration activities](#common-administration-activities)
+   3. [Forgot password](#forgot-password)
+   4. [Simple administration GUI](#simple-administration-gui)
+2. [Authentication service API](#authentication-service-api)
+   1. [Login](#login)
+   2. [Logout](#logout)
+   3. [SetPassword](#setpassword)
+   4. [ChangeMyPassword](#changemypassword)
+   5. [UnlockUser](#unlockuser)
+   6. [GeneratePasswordResetToken](#generatepasswordresettoken)
+   7. [SendPasswordResetToken](#sendpasswordresettoken)
+   8. [ResetPassword](#resetpassword)
+3. [Installation](#installation)
+   1. [1. Modify Web.config](#1-modify-webconfig)
+   2. [2. Configure IIS](#2-configure-iis)
+   3. [3. Configure IIS Express](#3-configure-iis-express)
+   4. [4. Set up HTTPS](#4-set-up-https)
+4. [Configuration](#configuration)
+   1. [Set the *admin* user password](#set-the-admin-user-password)
+   2. [Permissions and claims](#permissions-and-claims)
+   3. [Maximum failed password attempts](#maximum-failed-password-attempts)
+   4. [Password strength policy](#password-strength-policy)
+   5. [Overriding IIS binding configuration](#overriding-iis-binding-configuration)
+5. [Uninstallation](#uninstallation)
+   1. [Modify Web.config](#modify-webconfig)
+   2. [Configure IIS](#configure-iis)
+6. [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
+7. [Session timeout](#session-timeout)
+8. [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
+   1. [Custom implementation](#custom-implementation)
+9. [Troubleshooting](#troubleshooting)
+10. [Build](#build)
 
 ## Features
 
@@ -186,9 +185,13 @@ in order for the forms authentication to work:
 
 ### 1. Modify Web.config
 
-1. Comment out or delete the **two occurrences** of the following element:
+1. Comment out or delete the following **two occurrences** of the `security` element:
 
     ```XML
+    <security mode="TransportCredentialOnly">
+      <transport clientCredentialType="Windows" />
+    </security>
+    ...
     <security mode="TransportCredentialOnly">
       <transport clientCredentialType="Windows" />
     </security>
