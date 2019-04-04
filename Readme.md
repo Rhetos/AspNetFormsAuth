@@ -248,11 +248,12 @@ or inside `location / system.webServer` (usually at the end of the file):
 ### 4. Set up HTTPS
 
 HTTPS (or any other) secure transport protocol **should always be enforced** when using forms authentication.
-This is necessary because in forms authentication the password is submitted as a plain text.
+This is necessary because in forms authentication the **user's password** must be submitted from the client securely.
+At least the services inside `/Resources/AspNetFormsAuth` path must use HTTPS.
 
-At least the services inside `/Resources/AspNetFormsAuth` path must use HTTPS to protect user's password.
+To enable HTTPS, follow the instructions in [Setting up Rhetos for HTTPS](https://github.com/Rhetos/Rhetos/wiki/Setting-up-Rhetos-for-HTTPS).
 
-Consider using a [free SSL certificate](https://www.google.hr/search?q=free+SSL+certificate) (search the web for the providers)
+Consider using a [free SSL certificate](https://www.google.hr/search?q=free+SSL+certificate)
 in development or QA environment.
 
 ## Configuration
