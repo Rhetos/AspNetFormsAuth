@@ -39,7 +39,7 @@ namespace Rhetos.AspNetFormsAuth
                 if (_snippet == null)
                 {
                     string filePath = Path.Combine(Paths.ResourcesFolder, "AspNetFormsAuth", "HomePageSnippet.html");
-                    _snippet = File.ReadAllText(filePath, Encoding.Default);
+                    _snippet = File.ReadAllText(filePath);
                 }
                 return _snippet;
             }
