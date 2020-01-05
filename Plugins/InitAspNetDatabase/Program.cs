@@ -17,10 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos;
 using Rhetos.AspNetFormsAuth;
-using Rhetos.Utilities;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using WebMatrix.WebData;
@@ -37,7 +36,10 @@ namespace InitAspNetDatabase
             string errorMessage = null;
             try
             {
-                Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\.."));
+                var rootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..");
+                var configurationProvider = new Rhetos.ConfigurationBuilder().
+                    AddRhetosAppConfiguration(rootPath).Build();
+                LegacyUtilities.Initialize(configurationProvider);
                 CreateMembershipProviderTables();
             }
             catch (ApplicationException ex)
