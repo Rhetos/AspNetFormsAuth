@@ -45,10 +45,6 @@ namespace AdminSetup
             string errorMessage = null;
             try
             {
-                var configurationProvider = new Rhetos.ConfigurationBuilder().
-                    AddRhetosAppConfiguration(GetRhetosRootFolder()).Build();
-                LegacyUtilities.Initialize(configurationProvider);
-
                 Exception createAdminUserException = null;
                 try
                 {
@@ -70,6 +66,8 @@ namespace AdminSetup
                     }
                 }
 
+                // Initializing legacy utilities again, in case CreateAdminUserAndPermissions failed.
+                LegacyUtilities.Initialize(CreateRhetosConfiguration());
                 SetUpAdminAccount(password);
 
                 if (createAdminUserException != null)
@@ -102,18 +100,21 @@ namespace AdminSetup
 
         private static IContainer CreateRhetosContainer()
         {
-            var configurationProvider = new ConfigurationBuilder()
-                .AddRhetosAppConfiguration(GetRhetosRootFolder())
-                .AddConfigurationManagerConfiguration()
-                .Build();
-
             ConsoleLogger.MinLevel = EventType.Info;
             // Build the container:
-            var builder = new RhetosContainerBuilder(configurationProvider, new ConsoleLogProvider(), LegacyUtilities.GetListAssembliesDelegate());
+            var builder = new RhetosContainerBuilder(CreateRhetosConfiguration(), new ConsoleLogProvider(), LegacyUtilities.GetListAssembliesDelegate());
             builder.AddRhetosRuntime();
             builder.GetPluginRegistration().FindAndRegisterPluginModules();
             builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
             return builder.Build();
+        }
+
+        private static IConfigurationProvider CreateRhetosConfiguration()
+        {
+            return new ConfigurationBuilder()
+                .AddRhetosAppConfiguration(GetRhetosRootFolder())
+                .AddConfigurationManagerConfiguration()
+                .Build();
         }
 
         private static string GetRhetosRootFolder() => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..");
