@@ -37,8 +37,9 @@ namespace InitAspNetDatabase
             try
             {
                 var rootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..");
-                var configurationProvider = new Rhetos.ConfigurationBuilder().
-                    AddRhetosAppConfiguration(rootPath).Build();
+                var configurationProvider = new Rhetos.ConfigurationBuilder()
+                    .AddRhetosAppConfiguration(rootPath)
+                    .Build();
                 LegacyUtilities.Initialize(configurationProvider);
                 CreateMembershipProviderTables();
             }
