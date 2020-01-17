@@ -12,7 +12,7 @@
     <copyright>Copyright Omega software 2015</copyright>
     <tags>Rhetos plugin</tags>
     <dependencies>
-      <dependency id="Rhetos.CommonConcepts" version="2.8.0" />
+      <dependency id="Rhetos.CommonConcepts" version="4.0.0-dev" />
     </dependencies>
   </metadata>
   <files>
@@ -20,19 +20,19 @@
     <file src="DataMigration\**\*" target="DataMigration" />
     <file src="DslScripts\**\*" target="DslScripts" />
     <file src="Resources\**\*" target="Resources" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.dll" target="lib\net451" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.pdb" target="lib\net451" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.dll" target="lib\net451" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.pdb" target="lib\net451" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\WebMatrix.Data.dll" target="lib\net451" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\WebMatrix.WebData.dll" target="lib\net451" />
-    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe" target="lib\net451" />
-    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.pdb" target="lib\net451" />
-    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe.config" target="lib\net451" />
-    <file src="Plugins\AdminSetup\bin\Debug\System.Web.WebPages.dll" target="lib\net451" />
-    <file src="Plugins\AdminSetup\bin\Debug\System.Web.Helpers.dll" target="lib\net451" />
-    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe" target="lib\net451" />
-    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.pdb" target="lib\net451" />
-    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="lib\net451" />
+    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.dll" target="lib\net472" />
+    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.pdb" target="lib\net472" />
+    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.dll" target="lib\net472" />
+    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.pdb" target="lib\net472" />
+    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\WebMatrix.Data.dll" target="lib\net472" />
+    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\WebMatrix.WebData.dll" target="lib\net472" />
+    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe" target="lib\net472" />
+    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.pdb" target="lib\net472" />
+    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe.config" target="lib\net472" />
+    <file src="Plugins\AdminSetup\bin\Debug\System.Web.WebPages.dll" target="lib\net472" />
+    <file src="Plugins\AdminSetup\bin\Debug\System.Web.Helpers.dll" target="lib\net472" />
+    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe" target="lib\net472" />
+    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.pdb" target="lib\net472" />
+    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="lib\net472" />
   </files>
 </package>

@@ -18,25 +18,19 @@
 */
 
 using Autofac;
+using Rhetos;
 using Rhetos.AspNetFormsAuth;
-using Rhetos.Configuration.Autofac;
 using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Extensibility;
 using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using System.Web.Security;
-using System.Xml.Linq;
-using System.Xml.XPath;
 using WebMatrix.WebData;
 
 namespace AdminSetup
@@ -51,7 +45,6 @@ namespace AdminSetup
             string errorMessage = null;
             try
             {
-                Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\.."));
                 Exception createAdminUserException = null;
                 try
                 {
@@ -73,6 +66,8 @@ namespace AdminSetup
                     }
                 }
 
+                // Initializing legacy utilities again, in case CreateAdminUserAndPermissions failed.
+                LegacyUtilities.Initialize(CreateRhetosConfiguration());
                 SetUpAdminAccount(password);
 
                 if (createAdminUserException != null)
@@ -105,22 +100,24 @@ namespace AdminSetup
 
         private static IContainer CreateRhetosContainer()
         {
-            // Specific registrations and initialization:
-            Plugins.SetInitializationLogging(new ConsoleLogProvider());
             ConsoleLogger.MinLevel = EventType.Info;
-
-            // General registrations:
-            var builder = new ContainerBuilder();
-            builder.RegisterModule(new DefaultAutofacConfiguration(deploymentTime: false, deployDatabaseOnly: false));
-
-            // Specific registrations override:
-            builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
-            builder.RegisterType<ConsoleLogProvider>().As<ILogProvider>();
-
             // Build the container:
-            var container = builder.Build();
-            return container;
+            var builder = new RhetosContainerBuilder(CreateRhetosConfiguration(), new ConsoleLogProvider(), LegacyUtilities.GetListAssembliesDelegate());
+            builder.AddRhetosRuntime();
+            builder.GetPluginRegistration().FindAndRegisterPluginModules();
+            builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
+            return builder.Build();
         }
+
+        private static IConfigurationProvider CreateRhetosConfiguration()
+        {
+            return new ConfigurationBuilder()
+                .AddRhetosAppConfiguration(GetRhetosRootFolder())
+                .AddConfigurationManagerConfiguration()
+                .Build();
+        }
+
+        private static string GetRhetosRootFolder() => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..");
 
         private static void CreateAdminUserAndPermissions()
         {
@@ -128,7 +125,6 @@ namespace AdminSetup
             Exception originalException = null;
             try
             {
-                Directory.SetCurrentDirectory(Paths.RhetosServerRootPath);
                 using (var container = CreateRhetosContainer())
                 {
                     try
