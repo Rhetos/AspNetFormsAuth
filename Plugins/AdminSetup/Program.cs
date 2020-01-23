@@ -102,7 +102,8 @@ namespace AdminSetup
         {
             ConsoleLogger.MinLevel = EventType.Info;
             // Build the container:
-            var builder = new RhetosContainerBuilder(CreateRhetosConfiguration(), new ConsoleLogProvider(), LegacyUtilities.GetListAssembliesDelegate());
+            var rhetosConfiguration = CreateRhetosConfiguration();
+            var builder = new RhetosContainerBuilder(rhetosConfiguration, new ConsoleLogProvider(), LegacyUtilities.GetListAssembliesDelegate(rhetosConfiguration));
             builder.AddRhetosRuntime();
             builder.GetPluginRegistration().FindAndRegisterPluginModules();
             builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();

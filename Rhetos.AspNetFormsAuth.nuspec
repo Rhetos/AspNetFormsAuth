@@ -14,6 +14,10 @@
     <dependencies>
       <dependency id="Rhetos.CommonConcepts" version="4.0.0-dev" />
     </dependencies>
+    <contentFiles>
+        <files include="any/any/InitAspNetDatabase.exe.config" buildAction="None" copyToOutput="true" />
+        <files include="any/any/AdminSetup.exe.config" buildAction="None" copyToOutput="true" />
+    </contentFiles>       
   </metadata>
   <files>
     <file src="Readme.md" target="" />
@@ -34,5 +38,7 @@
     <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe" target="lib\net472" />
     <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.pdb" target="lib\net472" />
     <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="lib\net472" />
+    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe.config" target="contentFiles/any/any" />
+    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="contentFiles/any/any" />
   </files>
 </package>
