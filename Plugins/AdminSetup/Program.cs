@@ -113,7 +113,7 @@ namespace AdminSetup
         private static IConfigurationProvider CreateRhetosConfiguration()
         {
             return new ConfigurationBuilder()
-                .AddRhetosAppConfiguration(GetRhetosRootFolder())
+                .AddRhetosAppConfiguration()
                 .AddConfigurationManagerConfiguration()
                 .Build();
         }
