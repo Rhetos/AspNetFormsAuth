@@ -11,7 +11,7 @@ IF NOT EXIST Install\NuGet.exe POWERSHELL (New-Object System.Net.WebClient).Down
 REM Updating the build version.
 PowerShell -ExecutionPolicy ByPass .\ChangeVersion.ps1 %Version% %Prerelease% || GOTO Error0
 
-Install\NuGet.exe restore -NonInteractive || GOTO Error0
+NuGet.exe restore -NonInteractive || GOTO Error0
 MSBuild /target:rebuild /p:Configuration=Debug /verbosity:minimal /fileLogger || GOTO Error0
 Install\NuGet.exe pack -OutputDirectory Install || GOTO Error0
 
