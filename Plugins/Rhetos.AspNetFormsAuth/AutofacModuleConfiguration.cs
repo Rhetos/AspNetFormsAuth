@@ -21,11 +21,7 @@ using Autofac;
 using Rhetos.Extensibility;
 using Rhetos.Security;
 using Rhetos.Utilities;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 
 namespace Rhetos.AspNetFormsAuth
 {
