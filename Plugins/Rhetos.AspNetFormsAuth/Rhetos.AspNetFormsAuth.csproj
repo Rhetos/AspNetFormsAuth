@@ -58,7 +58,7 @@
     <Compile Include="AuthenticationServiceClaims.cs" />
     <Compile Include="AuthenticationServiceInitializer.cs" />
     <Compile Include="CancelUnauthorizedClientRedirection.cs" />
-    <Compile Include="InitializeAssemblyResolver.cs" />
+    <Compile Include="UtilityAssemblyResolver.cs" />
     <Compile Include="IPasswordAttemptsLimit.cs" />
     <Compile Include="IPasswordStrength.cs" />
     <Compile Include="HomePageSnippet.cs" />

@@ -21,12 +21,10 @@ using Autofac;
 using Rhetos;
 using Rhetos.AspNetFormsAuth;
 using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
-using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Text;
@@ -37,10 +35,17 @@ namespace AdminSetup
 {
     class Program
     {
-        // The exe will be placed in the subfolder: <server root>\bin\Plugins.
-        static readonly InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
-
         static int Main(string[] args)
+        {
+            // The Program class cannot use Rhetos classes directly, because it needs to register assembly resolved first. Application built with DeployPackages would fail with error "Could not load file or assembly...".
+            UtilityAssemblyResolver.RegisterAssemblyResolver();
+            return App.Run(args);
+        }
+    }
+
+    static class App
+    {
+        internal static int Run(string[] args)
         {
             string errorMessage = null;
             try
@@ -48,11 +53,11 @@ namespace AdminSetup
                 Exception createAdminUserException = null;
                 try
                 {
-                    // If CreateAdminUserAndPermissions() fails, this program will still try to execute SetUpAdminAccount() then report the exception later.
-                    CreateAdminUserAndPermissions();
+                    ExecuteInRhetosContainer(CreateAdminUserAndPermissions);
                 }
                 catch (Exception ex)
                 {
+                    // If CreateAdminUserAndPermissions() fails, this program will still try to execute SetUpAdminAccount() then report the exception later.
                     createAdminUserException = ex;
                 }
 
@@ -66,8 +71,6 @@ namespace AdminSetup
                     }
                 }
 
-                // Initializing legacy utilities again, in case CreateAdminUserAndPermissions failed.
-                LegacyUtilities.Initialize(CreateRhetosConfiguration());
                 SetUpAdminAccount(password);
 
                 if (createAdminUserException != null)
@@ -98,31 +101,14 @@ namespace AdminSetup
             return 0;
         }
 
-        private static IContainer CreateRhetosContainer()
+        private static void CreateAdminUserAndPermissions(IContainer container)
         {
-            ConsoleLogger.MinLevel = EventType.Info;
-            // Build the container:
-            var rhetosConfiguration = CreateRhetosConfiguration();
-            var builder = new RhetosContainerBuilder(rhetosConfiguration, new ConsoleLogProvider(), LegacyUtilities.GetListAssembliesDelegate(rhetosConfiguration));
-            builder.AddRhetosRuntime();
-            builder.GetPluginRegistration().FindAndRegisterPluginModules();
-            builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
-            return builder.Build();
+            var repositories = container.Resolve<GenericRepositories>();
+            new AdminUserInitializer(repositories).Initialize();
         }
 
-        private static IConfigurationProvider CreateRhetosConfiguration()
+        private static void ExecuteInRhetosContainer(Action<IContainer> action)
         {
-            return new ConfigurationBuilder()
-                .AddRhetosAppConfiguration()
-                .AddConfigurationManagerConfiguration()
-                .Build();
-        }
-
-        private static string GetRhetosRootFolder() => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..");
-
-        private static void CreateAdminUserAndPermissions()
-        {
-            string oldDirectory = Directory.GetCurrentDirectory();
             Exception originalException = null;
             try
             {
@@ -130,14 +116,12 @@ namespace AdminSetup
                 {
                     try
                     {
-                        var repositories = container.Resolve<GenericRepositories>();
-                        ConsoleLogger.MinLevel = EventType.Info;
-                        new AdminUserInitializer(repositories).Initialize();
+                        action(container);
                     }
                     catch (Exception ex)
                     {
                         // Some exceptions result with invalid SQL transaction state that results with another exception on disposal of this 'using' block.
-                        // The original exception is logged here to make sure that it is not overridden;
+                        // The original exception is logged here to make sure that it is not overridden.
                         originalException = ex;
 
                         container.Resolve<IPersistenceTransaction>().DiscardChanges();
@@ -155,10 +139,11 @@ namespace AdminSetup
                 else
                     ExceptionsUtility.Rethrow(ex);
             }
-            finally
-            {
-                Directory.SetCurrentDirectory(oldDirectory);
-            }
+        }
+
+        private static IContainer CreateRhetosContainer()
+        {
+            return Host.CreateRhetosContainer(registerComponents: builder => { builder.RegisterType<ProcessUserInfo>().As<IUserInfo>(); });
         }
 
         private static void SetUpAdminAccount(string defaultPassword = null)
@@ -171,7 +156,7 @@ namespace AdminSetup
 
             int id = WebSecurity.GetUserId(adminUserName);
             if (id == -1)
-                throw new ApplicationException("Missing '" + adminUserName + "' user entry in Common.Principal entity. Please execute DeployPackages.exe, with AspNetFormsAuth package included, to initialize the 'admin' user entry.");
+                throw new ApplicationException($"Missing '{adminUserName}' user entry in Common.Principal entity. Please execute DeployPackages.exe, with AspNetFormsAuth package included, to initialize the 'admin' user entry.");
 
             string adminPassword = string.IsNullOrWhiteSpace(defaultPassword) ? InputPassword() : defaultPassword;
 

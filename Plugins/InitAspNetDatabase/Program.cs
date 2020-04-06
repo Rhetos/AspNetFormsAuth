@@ -19,8 +19,8 @@
 
 using Rhetos;
 using Rhetos.AspNetFormsAuth;
+using Rhetos.Utilities;
 using System;
-using System.IO;
 using System.Linq;
 using WebMatrix.WebData;
 
@@ -28,18 +28,23 @@ namespace InitAspNetDatabase
 {
     class Program
     {
-        // The exe will be placed in the subfolder: <server root>\bin\Plugins.
-        static readonly InitializeAssemblyResolver staticInitialization = new InitializeAssemblyResolver("..");
-
         static int Main(string[] args)
+        {
+            // The Program class cannot use Rhetos classes directly, because it needs to register assembly resolved first. Application built with DeployPackages would fail with error "Could not load file or assembly...".
+            UtilityAssemblyResolver.RegisterAssemblyResolver();
+            return App.Run(args);
+        }
+    }
+
+    static class App
+    {
+        internal static int Run(string[] args)
         {
             string errorMessage = null;
             try
             {
-                var configurationProvider = new ConfigurationBuilder()
-                    .AddRhetosAppConfiguration()
-                    .AddConfigurationManagerConfiguration()
-                    .Build();
+                var host = Host.Find(AppDomain.CurrentDomain.BaseDirectory, new ConsoleLogProvider());
+                var configurationProvider = host.RhetosRuntime.BuildConfiguration(new ConsoleLogProvider(), host.ConfigurationFolder, null);
                 LegacyUtilities.Initialize(configurationProvider);
                 CreateMembershipProviderTables();
             }
