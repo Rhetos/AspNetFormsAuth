@@ -44,8 +44,8 @@ namespace InitAspNetDatabase
             try
             {
                 var host = Host.Find(AppDomain.CurrentDomain.BaseDirectory, new ConsoleLogProvider());
-                var configurationProvider = host.RhetosRuntime.BuildConfiguration(new ConsoleLogProvider(), host.ConfigurationFolder, null);
-                LegacyUtilities.Initialize(configurationProvider);
+                var configuration = host.RhetosRuntime.BuildConfiguration(new ConsoleLogProvider(), host.ConfigurationFolder, null);
+                LegacyUtilities.Initialize(configuration);
                 CreateMembershipProviderTables();
             }
             catch (ApplicationException ex)
