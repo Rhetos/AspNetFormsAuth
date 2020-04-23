@@ -44,7 +44,8 @@ namespace InitAspNetDatabase
             try
             {
                 var host = Host.Find(AppDomain.CurrentDomain.BaseDirectory, new ConsoleLogProvider());
-                var configuration = host.RhetosRuntime.BuildConfiguration(new ConsoleLogProvider(), host.ConfigurationFolder, null);
+                var configuration = host.RhetosRuntime.BuildConfiguration(new ConsoleLogProvider(), host.ConfigurationFolder,
+                    configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration());
                 LegacyUtilities.Initialize(configuration);
                 CreateMembershipProviderTables();
             }

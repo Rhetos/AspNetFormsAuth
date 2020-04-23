@@ -143,7 +143,9 @@ namespace AdminSetup
 
         private static IContainer CreateRhetosContainer()
         {
-            return Host.CreateRhetosContainer(registerCustomComponents: builder => { builder.RegisterType<ProcessUserInfo>().As<IUserInfo>(); });
+            return Host.CreateRhetosContainer(
+                addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration(),
+                registerCustomComponents: containerBuilder => containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>());
         }
 
         private static void SetUpAdminAccount(string defaultPassword = null)
