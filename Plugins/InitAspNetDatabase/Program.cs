@@ -47,6 +47,7 @@ namespace InitAspNetDatabase
                 var configuration = host.RhetosRuntime.BuildConfiguration(new ConsoleLogProvider(), host.ConfigurationFolder,
                     configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration());
                 LegacyUtilities.Initialize(configuration);
+
                 CreateMembershipProviderTables();
             }
             catch (ApplicationException ex)

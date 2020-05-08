@@ -21,10 +21,10 @@ using Autofac;
 using Rhetos;
 using Rhetos.AspNetFormsAuth;
 using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Persistence;
 using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
 using System.Text;
@@ -37,66 +37,13 @@ namespace AdminSetup
     {
         static int Main(string[] args)
         {
-            // The Program class cannot use Rhetos classes directly, because it needs to register assembly resolved first. Application built with DeployPackages would fail with error "Could not load file or assembly...".
-            UtilityAssemblyResolver.RegisterAssemblyResolver();
-            return App.Run(args);
-        }
-    }
-
-    static class App
-    {
-        internal static int Run(string[] args)
-        {
             string errorMessage = null;
             try
             {
-                var processContainer = new RhetosProcessContainer(
-                    addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration(),
-                    registerCustomComponents: containerBuilder => containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>());
-
-                Exception createAdminUserException = null;
-                try
-                {
-                    Exception originalException = null;
-                    try
-                    {
-                        using (var container = processContainer.CreateTransactionScope())
-                        {
-                            CreateAdminUserAndPermissions(container);
-                            container.CommitChanges();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (originalException != null && ex != originalException)
-                        {
-                            Console.WriteLine("Error on cleanup: " + ex.ToString());
-                            ExceptionsUtility.Rethrow(originalException);
-                        }
-                        else
-                            ExceptionsUtility.Rethrow(ex);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // If CreateAdminUserAndPermissions fails, this program will still try to execute SetUpAdminAccount() then report the exception later.
-                    createAdminUserException = ex;
-                }
-
-                string password = null;
-                for (int i = 0; i < args.Length; i++)
-                {
-                    if (args[i] == "-pass" && i < args.Length - 1)
-                    {
-                        password = args[i + 1];
-                        break;
-                    }
-                }
-
-                SetUpAdminAccount(password);
-
-                if (createAdminUserException != null)
-                    ExceptionsUtility.Rethrow(createAdminUserException);
+                // The Program class cannot use Rhetos classes directly, because it needs to register assembly resolved first. Application built with DeployPackages would fail with error "Could not load file or assembly...".
+                UtilityAssemblyResolver.RegisterAssemblyResolver();
+                App.Run(args);
+                return 0;
             }
             catch (ApplicationException ex)
             {
@@ -122,8 +69,56 @@ namespace AdminSetup
 
             return 0;
         }
+    }
 
-        private static void CreateAdminUserAndPermissions(RhetosTransactionScopeContainer container)
+    static class App
+    {
+        internal static void Run(string[] args)
+        {
+            var commands = new List<Action<TransactionScopeContainer>>
+            {
+                container => CreateAdminUserAndPermissions(container),
+                container =>
+                {
+                    string password = null;
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        if (args[i] == "-pass" && i < args.Length - 1)
+                        {
+                            password = args[i + 1];
+                            break;
+                        }
+                    }
+                    SetUpAdminAccount(password);
+                }
+            };
+
+
+            var processContainer = new ProcessContainer(
+                addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration(),
+                registerCustomComponents: containerBuilder => containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>());
+
+            // If the first command fails ("CreateAdminUserAndPermissions"), this program will still try to execute "SetUpAdminAccount" then report the exception later.
+            var exceptions = new List<Exception>();
+            foreach (var command in commands)
+                try
+                {
+                    using (var container = processContainer.CreateTransactionScopeContainer())
+                    {
+                        command(container);
+                        container.CommitChanges();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+
+            if (exceptions.Any())
+                ExceptionsUtility.Rethrow(exceptions.First());
+        }
+
+        private static void CreateAdminUserAndPermissions(TransactionScopeContainer container)
         {
             var repositories = container.Resolve<GenericRepositories>();
             new AdminUserInitializer(repositories).Initialize();
