@@ -50,14 +50,36 @@ namespace AdminSetup
             string errorMessage = null;
             try
             {
+                var processContainer = new RhetosProcessContainer(
+                    addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration(),
+                    registerCustomComponents: containerBuilder => containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>());
+
                 Exception createAdminUserException = null;
                 try
                 {
-                    ExecuteInRhetosContainer(CreateAdminUserAndPermissions);
+                    Exception originalException = null;
+                    try
+                    {
+                        using (var container = processContainer.CreateTransactionScope())
+                        {
+                            CreateAdminUserAndPermissions(container);
+                            container.CommitChanges();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (originalException != null && ex != originalException)
+                        {
+                            Console.WriteLine("Error on cleanup: " + ex.ToString());
+                            ExceptionsUtility.Rethrow(originalException);
+                        }
+                        else
+                            ExceptionsUtility.Rethrow(ex);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    // If CreateAdminUserAndPermissions() fails, this program will still try to execute SetUpAdminAccount() then report the exception later.
+                    // If CreateAdminUserAndPermissions fails, this program will still try to execute SetUpAdminAccount() then report the exception later.
                     createAdminUserException = ex;
                 }
 
@@ -101,51 +123,10 @@ namespace AdminSetup
             return 0;
         }
 
-        private static void CreateAdminUserAndPermissions(IContainer container)
+        private static void CreateAdminUserAndPermissions(RhetosTransactionScopeContainer container)
         {
             var repositories = container.Resolve<GenericRepositories>();
             new AdminUserInitializer(repositories).Initialize();
-        }
-
-        private static void ExecuteInRhetosContainer(Action<IContainer> action)
-        {
-            Exception originalException = null;
-            try
-            {
-                using (var container = CreateRhetosContainer())
-                {
-                    try
-                    {
-                        action(container);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Some exceptions result with invalid SQL transaction state that results with another exception on disposal of this 'using' block.
-                        // The original exception is logged here to make sure that it is not overridden.
-                        originalException = ex;
-
-                        container.Resolve<IPersistenceTransaction>().DiscardChanges();
-                        ExceptionsUtility.Rethrow(ex);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                if (originalException != null && ex != originalException)
-                {
-                    Console.WriteLine("Error on cleanup: " + ex.ToString());
-                    ExceptionsUtility.Rethrow(originalException);
-                }
-                else
-                    ExceptionsUtility.Rethrow(ex);
-            }
-        }
-
-        private static IContainer CreateRhetosContainer()
-        {
-            return Host.CreateRhetosContainer(
-                addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration(),
-                registerCustomComponents: containerBuilder => containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>());
         }
 
         private static void SetUpAdminAccount(string defaultPassword = null)
