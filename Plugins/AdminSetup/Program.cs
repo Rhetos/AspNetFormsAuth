@@ -93,10 +93,8 @@ namespace AdminSetup
                 }
             };
 
-
             var processContainer = new ProcessContainer(
-                addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration(),
-                registerCustomComponents: containerBuilder => containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>());
+                addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration());
 
             // If the first command fails ("CreateAdminUserAndPermissions"), this program will still try to execute "SetUpAdminAccount" then report the exception later.
             var exceptions = new List<Exception>();
