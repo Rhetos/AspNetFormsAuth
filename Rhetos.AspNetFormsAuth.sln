@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminSetup", "Plugins\AdminSetup\AdminSetup.csproj", "{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminSetup", "src\AdminSetup\AdminSetup.csproj", "{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InitAspNetDatabase", "Plugins\InitAspNetDatabase\InitAspNetDatabase.csproj", "{D0AA25A2-8D00-472A-9395-26003D89A702}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InitAspNetDatabase", "src\InitAspNetDatabase\InitAspNetDatabase.csproj", "{D0AA25A2-8D00-472A-9395-26003D89A702}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth", "Plugins\Rhetos.AspNetFormsAuth\Rhetos.AspNetFormsAuth.csproj", "{8CE0595E-B553-48D0-8848-9ECB254B2973}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth", "src\Rhetos.AspNetFormsAuth\Rhetos.AspNetFormsAuth.csproj", "{8CE0595E-B553-48D0-8848-9ECB254B2973}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth.Interfaces", "Plugins\Rhetos.AspNetFormsAuth.Interfaces\Rhetos.AspNetFormsAuth.Interfaces.csproj", "{B818F493-EF0C-448F-A89F-FC805FFA879E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth.Interfaces", "src\Rhetos.AspNetFormsAuth.Interfaces\Rhetos.AspNetFormsAuth.Interfaces.csproj", "{B818F493-EF0C-448F-A89F-FC805FFA879E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

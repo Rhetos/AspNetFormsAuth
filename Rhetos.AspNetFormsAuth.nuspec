@@ -23,20 +23,20 @@
   </metadata>
   <files>
     <file src="Readme.md" target="" />
-    <file src="DataMigration\**\*" target="DataMigration" />
-    <file src="DslScripts\**\*" target="DslScripts" />
-    <file src="Resources\**\*" target="Resources" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.dll" target="lib\net472" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.pdb" target="lib\net472" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.dll" target="lib\net472" />
-    <file src="Plugins\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.pdb" target="lib\net472" />
-    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe" target="lib\net472" />
-    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.pdb" target="lib\net472" />
-    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe.config" target="lib\net472" />
-    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe" target="lib\net472" />
-    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.pdb" target="lib\net472" />
-    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="lib\net472" />
-    <file src="Plugins\AdminSetup\bin\Debug\AdminSetup.exe.config" target="contentFiles/any/any" />
-    <file src="Plugins\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="contentFiles/any/any" />
+    <file src="src\DataMigration\**\*" target="DataMigration" />
+    <file src="src\DslScripts\**\*" target="DslScripts" />
+    <file src="src\Resources\**\*" target="Resources" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.dll" target="lib\net472" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.pdb" target="lib\net472" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.dll" target="lib\net472" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.pdb" target="lib\net472" />
+    <file src="src\AdminSetup\bin\Debug\AdminSetup.exe" target="lib\net472" />
+    <file src="src\AdminSetup\bin\Debug\AdminSetup.pdb" target="lib\net472" />
+    <file src="src\AdminSetup\bin\Debug\AdminSetup.exe.config" target="lib\net472" />
+    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe" target="lib\net472" />
+    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.pdb" target="lib\net472" />
+    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="lib\net472" />
+    <file src="src\AdminSetup\bin\Debug\AdminSetup.exe.config" target="contentFiles/any/any" />
+    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="contentFiles/any/any" />
   </files>
 </package>
