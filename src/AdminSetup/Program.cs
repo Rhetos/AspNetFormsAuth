@@ -17,19 +17,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Autofac;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Rhetos;
 using Rhetos.AspNetFormsAuth;
-using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.IO;
+using Rhetos.Host.AspNet;
+using Rhetos.Persistence;
+using System.Reflection;
+using Rhetos.Security;
 using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Web.Security;
-using WebMatrix.WebData;
 
 namespace AdminSetup
 {
@@ -37,12 +40,10 @@ namespace AdminSetup
     {
         static int Main(string[] args)
         {
-            string errorMessage = null;
+            string errorMessage;
             try
             {
-                // The Program class cannot use Rhetos classes directly, because it needs to register assembly resolved first. Application built with DeployPackages would fail with error "Could not load file or assembly...".
-                UtilityAssemblyResolver.RegisterAssemblyResolver();
-                App.Run(args);
+                new App().Run(args);
                 return 0;
             }
             catch (ApplicationException ex)
@@ -58,12 +59,6 @@ namespace AdminSetup
             {
                 Console.WriteLine();
                 Console.WriteLine(errorMessage);
-                if (!args.Any(arg => arg.Equals("/nopause")))
-                {
-                    Console.WriteLine();
-                    Console.Write("Press any key to continue . . .");
-                    Console.ReadKey(true);
-                }
                 return 1;
             }
 
@@ -71,156 +66,98 @@ namespace AdminSetup
         }
     }
 
-    static class App
+    class App
     {
-        internal static void Run(string[] args)
+        static readonly string ExecuteCommandInCurrentProcessOptionName = "--execute-command-in-current-process";
+
+        internal void Run(string[] args)
         {
-            var commands = new List<Action<TransactionScopeContainer>>
+            var rootCommand = new RootCommand();
+            rootCommand.Add(new Argument<FileInfo>("startup-assembly") { Description = "Startup assembly of the host application." });
+            rootCommand.Add(new Argument<string>("password") { Description = "Administrator password." });
+            //Lack of this switch means that the dbupdate command should start the command rhetos.exe dbupdate
+            //in another process with the host applications runtimeconfig.json and deps.json files
+            var executeCommandInCurrentProcessOption = new Option<bool>(ExecuteCommandInCurrentProcessOptionName);
+            executeCommandInCurrentProcessOption.IsHidden = true;
+            rootCommand.Add(executeCommandInCurrentProcessOption);
+            rootCommand.Handler =
+                CommandHandler.Create((FileInfo startupAssembly, string password, bool executeCommandInCurrentProcess) => {
+                    if (executeCommandInCurrentProcess)
+                        return ExecuteCommands(startupAssembly.FullName, password);
+                    else
+                        return InvokeAsExternalProcess(startupAssembly.FullName, args);
+                });
+
+            rootCommand.Invoke(args);
+        }
+
+        private int ExecuteCommands(string rhetosHostAssemblyPath, string password)
+        {
+            var host = GetHostBuilder(rhetosHostAssemblyPath)
+                .ConfigureServices(serviceCollection => serviceCollection.AddScoped<IUserInfo, ProcessUserInfo>())
+                .Build();
+            using (var scope = host.Services.CreateScope())
             {
-                container => CreateAdminUserAndPermissions(container),
-                container =>
-                {
-                    string password = null;
-                    for (int i = 0; i < args.Length; i++)
-                    {
-                        if (args[i] == "-pass" && i < args.Length - 1)
-                        {
-                            password = args[i + 1];
-                            break;
-                        }
-                    }
-                    SetUpAdminAccount(password);
-                }
-            };
+                scope.ServiceProvider.GetService<IRhetosComponent<AdminUserInitializer>>().Value.Initialize();
+                SetUpAdminAccount(scope.ServiceProvider, password);
+                scope.ServiceProvider.GetService<IRhetosComponent<IPersistenceTransaction>>().Value.CommitChanges();
+            }
 
-            var processContainer = new ProcessContainer(
-                addCustomConfiguration: configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration());
-
-            // If the first command fails ("CreateAdminUserAndPermissions"), this program will still try to execute "SetUpAdminAccount" then report the exception later.
-            var exceptions = new List<Exception>();
-            foreach (var command in commands)
-                try
-                {
-                    using (var container = processContainer.CreateTransactionScopeContainer())
-                    {
-                        command(container);
-                        container.CommitChanges();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    exceptions.Add(ex);
-                }
-
-            if (exceptions.Any())
-                ExceptionsUtility.Rethrow(exceptions.First());
+            return 0;
         }
 
-        private static void CreateAdminUserAndPermissions(TransactionScopeContainer container)
+        private void SetUpAdminAccount(IServiceProvider scope, string password)
         {
-            var repositories = container.Resolve<GenericRepositories>();
-            new AdminUserInitializer(repositories).Initialize();
-        }
+            const string adminUserName = AdminUserInitializer.AdminUserName;
 
-        private static void SetUpAdminAccount(string defaultPassword = null)
-        {
-            CheckElevatedPrivileges();
+            var userManager = scope.GetService<UserManager<IdentityUser<Guid>>>();
+            if(userManager == null)
+                throw new ApplicationException($"The AspNetFormsAuth package is not configured properly. Call the {nameof(AspNetFormsAuthCollectionExtensions.AddAspNetFormsAuth)} method on the {nameof(IServiceCollection)} inside the Startup.ConfigureServices method.");
+           
+            var persistenceTransaction = scope.GetService<IRhetosComponent<IPersistenceTransaction>>();
 
-            AuthenticationServiceInitializer.InitializeDatabaseConnection(autoCreateTables: true);
-
-            const string adminUserName = AuthenticationDatabaseInitializer.AdminUserName;
-
-            int id = WebSecurity.GetUserId(adminUserName);
-            if (id == -1)
+            var principalCount = persistenceTransaction.Value.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Common.Principal WHERE Name = @0", new object[] { adminUserName }).Result;
+            if (principalCount == 0)
                 throw new ApplicationException($"Missing '{adminUserName}' user entry in Common.Principal entity. Please execute DeployPackages.exe, with AspNetFormsAuth package included, to initialize the 'admin' user entry.");
 
-            string adminPassword = string.IsNullOrWhiteSpace(defaultPassword) ? InputPassword() : defaultPassword;
+            var user = userManager.FindByNameAsync(adminUserName).Result;
 
-            try
-            {
-                WebSecurity.CreateAccount(adminUserName, adminPassword);
-                Console.WriteLine("Password successfully initialized.");
-            }
-            catch (MembershipCreateUserException ex)
-            {
-                if (ex.Message != "The username is already in use.")
-                    throw;
+            var token = userManager.GeneratePasswordResetTokenAsync(user).Result;
+            var changedPasswordResults = userManager.ResetPasswordAsync(user, token, password).Result;
 
-                var token = WebSecurity.GeneratePasswordResetToken(adminUserName);
-                var changed = WebSecurity.ResetPassword(token, adminPassword);
-                if (!changed)
-                    throw new ApplicationException("Cannot change password. WebSecurity.ResetPassword failed.");
+            if (!changedPasswordResults.Succeeded)
+                throw new ApplicationException($"Cannot change password. ResetPassword failed with errors: {string.Join(Environment.NewLine, changedPasswordResults.Errors.Select(x => x.Description))}.");
 
-                Console.WriteLine("Password successfully changed.");
-            }
+            Console.WriteLine("Password successfully changed.");
         }
 
-        private static void CheckElevatedPrivileges()
+        private int InvokeAsExternalProcess(string rhetosHostDllPath, string[] baseArgs)
         {
-            bool elevated;
-            try
-            {
-                WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-                elevated = principal.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.GetType() + ": " + ex.Message);
-                elevated = false;
-            }
-
-            if (!elevated)
-                throw new ApplicationException(System.Diagnostics.Process.GetCurrentProcess().ProcessName + " has to be executed with elevated privileges (as administrator).");
+            var logger = new ConsoleLogProvider().GetLogger("AdminSetup");
+            var newArgs = new List<string>(baseArgs);
+            newArgs.Add(ExecuteCommandInCurrentProcessOptionName);
+            return Exe.RunWithHostConfiguration(GetType().Assembly.Location, rhetosHostDllPath, newArgs, logger);
         }
 
-        private static string InputPassword()
+        private static IHostBuilder GetHostBuilder(string rhetosHostAssemblyPath)
         {
-            var oldFg = Console.ForegroundColor;
-            var oldBg = Console.BackgroundColor;
-            try
-            {
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.BackgroundColor = ConsoleColor.Black;
+            var HostBuilderFactoryMethodName = "CreateHostBuilder";
+            var startupAssembly = Assembly.LoadFrom(rhetosHostAssemblyPath);
 
-                var buildPwd = new StringBuilder();
-                ConsoleKeyInfo key;
+            var entryPointType = startupAssembly?.EntryPoint?.DeclaringType;
+            if (entryPointType == null)
+                throw new FrameworkException($"Startup assembly '{startupAssembly.Location}' doesn't have an entry point.");
 
-                Console.WriteLine();
-                Console.Write("Enter new password for user 'admin': ");
-                do
-                {
-                    key = Console.ReadKey(true);
+            var method = entryPointType.GetMethod(HostBuilderFactoryMethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
+            if (method == null)
+                throw new FrameworkException(
+                    $"Static method '{entryPointType.FullName}.{HostBuilderFactoryMethodName}' not found in entry point type in assembly {startupAssembly.Location}."
+                    + $" Method is required in entry point assembly for constructing a configured instance of {nameof(IHost)}.");
 
-                    if (((int)key.KeyChar) >= 32)
-                    {
-                        buildPwd.Append(key.KeyChar);
-                        Console.Write("*");
-                    }
-                    else if (key.Key == ConsoleKey.Backspace && buildPwd.Length > 0)
-                    {
-                        buildPwd.Remove(buildPwd.Length - 1, 1);
-                        Console.Write("\b \b");
-                    }
-                    else if (key.Key == ConsoleKey.Escape)
-                    {
-                        Console.WriteLine();
-                        throw new ApplicationException("User pressed the escape key.");
-                    }
+            if (method.ReturnType != typeof(IHostBuilder))
+                throw new FrameworkException($"Static method '{entryPointType.FullName}.{HostBuilderFactoryMethodName}' has incorrect return type. Expected return type is {nameof(IHostBuilder)}.");
 
-                } while (key.Key != ConsoleKey.Enter);
-                Console.WriteLine();
-
-                string pwd = buildPwd.ToString();
-                if (string.IsNullOrWhiteSpace(pwd))
-                    throw new ApplicationException("The password may not be empty.");
-
-                return pwd;
-            }
-            finally
-            {
-                Console.ForegroundColor = oldFg;
-                Console.BackgroundColor = oldBg;
-            }
+            return (IHostBuilder)method.InvokeEx(null, new object[] { new string[0] });
         }
     }
 }

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Rhetos.AspNetFormsAuth</id>
-    <version>3.1.0-dev</version>
+    <version>5.0.0-dev</version>
     <authors>Omega software</authors>
     <owners>Omega software</owners>
     <licenseUrl>http://opensource.org/licenses/AGPL-3.0</licenseUrl>
@@ -12,31 +12,34 @@
     <copyright>Copyright Omega software 2015</copyright>
     <tags>Rhetos plugin</tags>
     <dependencies>
-      <dependency id="Rhetos.CommonConcepts" version="4.0.0" />
-      <dependency id="Microsoft.AspNet.WebPages" version="2.0.20710.0" />
-      <dependency id="Microsoft.AspNet.WebPages.WebData" version="2.0.20710.0" />
+      <dependency id="Rhetos.CommonConcepts" version="5.0.0-dev" />
     </dependencies>
+    <frameworkReferences>
+      <group targetFramework="net5.0">
+        <frameworkReference name="Microsoft.AspNetCore.App" />
+      </group>
+    </frameworkReferences>
     <contentFiles>
-        <files include="any/any/InitAspNetDatabase.exe.config" buildAction="None" copyToOutput="true" />
-        <files include="any/any/AdminSetup.exe.config" buildAction="None" copyToOutput="true" />
-    </contentFiles>       
+      <files include="any/any/AdminSetup.exe" buildAction="None" copyToOutput="true" />
+      <files include="any/any/AdminSetup.dll" buildAction="None" copyToOutput="true" />
+      <files include="any/any/AdminSetup.pdb" buildAction="None" copyToOutput="true" />
+      <files include="any/any/AdminSetup.deps.json" buildAction="None" copyToOutput="true" />
+      <files include="any/any/AdminSetup.runtimeconfig.json" buildAction="None" copyToOutput="true" />
+    </contentFiles>
   </metadata>
   <files>
     <file src="Readme.md" target="" />
     <file src="src\DataMigration\**\*" target="DataMigration" />
     <file src="src\DslScripts\**\*" target="DslScripts" />
-    <file src="src\Resources\**\*" target="Resources" />
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.dll" target="lib\net472" />
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.pdb" target="lib\net472" />
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.dll" target="lib\net472" />
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\Rhetos.AspNetFormsAuth.Interfaces.pdb" target="lib\net472" />
-    <file src="src\AdminSetup\bin\Debug\AdminSetup.exe" target="lib\net472" />
-    <file src="src\AdminSetup\bin\Debug\AdminSetup.pdb" target="lib\net472" />
-    <file src="src\AdminSetup\bin\Debug\AdminSetup.exe.config" target="lib\net472" />
-    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe" target="lib\net472" />
-    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.pdb" target="lib\net472" />
-    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="lib\net472" />
-    <file src="src\AdminSetup\bin\Debug\AdminSetup.exe.config" target="contentFiles/any/any" />
-    <file src="src\InitAspNetDatabase\bin\Debug\InitAspNetDatabase.exe.config" target="contentFiles/any/any" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.dll" target="lib\net5.0" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.pdb" target="lib\net5.0" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.Interfaces.dll" target="lib\net5.0" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.Interfaces.pdb" target="lib\net5.0" />
+
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.exe" target="contentFiles/any/any" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.dll" target="contentFiles/any/any" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.pdb" target="contentFiles/any/any" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.deps.json" target="contentFiles/any/any" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.runtimeconfig.json" target="contentFiles/any/any" />
   </files>
 </package>

@@ -1,4 +1,4 @@
-/*
+﻿/*
     Copyright (C) 2014 Omega software d.o.o.
 
     This file is part of Rhetos.
@@ -17,173 +17,60 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Microsoft.AspNetCore.Identity;
 using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Extensibility;
+using Rhetos.Host.AspNet;
 using Rhetos.Logging;
 using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel;
-using System.ServiceModel.Activation;
-using System.ServiceModel.Web;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Web.Security;
-using WebMatrix.WebData;
+using System.Threading.Tasks;
 
 namespace Rhetos.AspNetFormsAuth
 {
-    #region Service parameters
-
-    public class LoginParameters
-    {
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        /// <summary>
-        /// "PersistCookie" parameter may be presented to users as the "Remember me" checkbox.
-        /// </summary>
-        public bool PersistCookie { get; set; }
-
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(UserName))
-                throw new UserException("Empty UserName is not allowed.");
-
-            if (string.IsNullOrWhiteSpace(Password))
-                throw new UserException("Empty Password is not allowed.");
-        }
-    }
-
-    public class SetPasswordParameters
-    {
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public bool IgnorePasswordStrengthPolicy { get; set; }
-
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(UserName))
-                throw new UserException("Empty UserName is not allowed.");
-
-            if (string.IsNullOrWhiteSpace(Password))
-                throw new UserException("Empty Password is not allowed.");
-        }
-    }
-
-    public class ChangeMyPasswordParameters
-    {
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
-
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(OldPassword))
-                throw new UserException("Empty OldPassword is not allowed.");
-
-            if (string.IsNullOrWhiteSpace(NewPassword))
-                throw new UserException("Empty NewPassword is not allowed.");
-        }
-    }
-
-    public class UnlockUserParameters
-    {
-        public string UserName { get; set; }
-
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(UserName))
-                throw new UserException("Empty UserName is not allowed.");
-        }
-    }
-
-    public class GeneratePasswordResetTokenParameters
-    {
-        public string UserName { get; set; }
-
-        public const int DefaultTokenExpirationInMinutes = 1440;
-
-        /// <summary>
-        /// Optional. If not set (0 value), the DefaultTokenExpirationInMinutes will be used.
-        /// </summary>
-        public int TokenExpirationInMinutesFromNow { get; set; }
-
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(UserName))
-                throw new UserException("Empty UserName is not allowed.");
-        }
-    }
-
-    public class SendPasswordResetTokenParameters
-    {
-        public string UserName { get; set; }
-
-        /// <summary>
-        /// Used for future ISendPasswordResetToken extensibility.
-        /// For example, AdditionalClientInfo may contain answers to security questions, preferred method of communication or similar user provided information.
-        /// </summary>
-        public Dictionary<string, string> AdditionalClientInfo { get; set; }
-
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(UserName))
-                throw new UserException("Empty UserName is not allowed.");
-        }
-    }
-
-    public class ResetPasswordParameters
-    {
-        public string PasswordResetToken { get; set; }
-        public string NewPassword { get; set; }
-
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(PasswordResetToken))
-                throw new UserException("Empty PasswordResetToken is not allowed.");
-
-            if (string.IsNullOrWhiteSpace(NewPassword))
-                throw new UserException("Empty NewPassword is not allowed.");
-        }
-    }
-
-    #endregion
-
-    [ServiceContract]
-    [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class AuthenticationService
     {
+        public const int DefaultTokenExpirationInMinutes = 1440;
+
         private readonly ILogger _logger;
         private readonly Lazy<IAuthorizationManager> _authorizationManager;
         private readonly Lazy<IEnumerable<IPasswordStrength>> _passwordStrengthRules;
-        private readonly Lazy<IEnumerable<IPasswordAttemptsLimit>> _passwordAttemptsLimits;
         private readonly Lazy<ISqlExecuter> _sqlExecuter;
         private readonly Lazy<ISendPasswordResetToken> _sendPasswordResetTokenPlugin;
         private readonly ILocalizer _localizer;
+        private readonly SignInManager<IdentityUser<Guid>> _signInManager;
+        private readonly UserManager<IdentityUser<Guid>> _userManager;
 
         public AuthenticationService(
-            ILogProvider logProvider,
-            Lazy<IAuthorizationManager> authorizationManager,
-            GenericRepositories repositories,
-            Lazy<ISqlExecuter> sqlExecuter,
-            Lazy<IEnumerable<ISendPasswordResetToken>> sendPasswordResetTokenPlugins,
-            ILocalizer localizer)
+            IRhetosComponent<ILogProvider> logProvider,
+            IRhetosComponent<Lazy<IAuthorizationManager>> authorizationManager,
+            IRhetosComponent<GenericRepositories> repositories,
+            IRhetosComponent<Lazy<ISqlExecuter>> sqlExecuter,
+            IRhetosComponent<Lazy<IEnumerable<ISendPasswordResetToken>>> sendPasswordResetTokenPlugins,
+            IRhetosComponent<ILocalizer> localizer,
+            SignInManager<IdentityUser<Guid>> signInManager,
+            UserManager<IdentityUser<Guid>> userManager,
+            AuthenticationServiceOptions authenticationServiceOptions)
         {
-            _logger = logProvider.GetLogger("AspNetFormsAuth.AuthenticationService");
-            _authorizationManager = authorizationManager;
-            _sqlExecuter = sqlExecuter;
-            _sendPasswordResetTokenPlugin = new Lazy<ISendPasswordResetToken>(() => SinglePlugin(sendPasswordResetTokenPlugins));
+            _logger = logProvider.Value.GetLogger("AspNetFormsAuth.AuthenticationService");
+            _authorizationManager = authorizationManager.Value;
+            _sqlExecuter = sqlExecuter.Value;
+            _sendPasswordResetTokenPlugin = new Lazy<ISendPasswordResetToken>(() => SinglePlugin(sendPasswordResetTokenPlugins.Value));
+            _signInManager = signInManager;
+            _userManager = userManager;
 
-            _passwordStrengthRules = new Lazy<IEnumerable<IPasswordStrength>>(() => repositories.Load<IPasswordStrength>());
-            _passwordAttemptsLimits = new Lazy<IEnumerable<IPasswordAttemptsLimit>>(() =>
-                {
-                    var limits = repositories.Load<IPasswordAttemptsLimit>();
-                    foreach (var limit in limits)
-                        if (limit.TimeoutInSeconds == null || limit.TimeoutInSeconds <= 0)
-                            limit.TimeoutInSeconds = int.MaxValue;
-                    return limits;
-                });
-            _localizer = localizer;
+            _passwordStrengthRules = new Lazy<IEnumerable<IPasswordStrength>>(() => {
+                if (authenticationServiceOptions.UseRegexRulesForPasswordStrengthCheck)
+                    return repositories.Value.Load<IPasswordStrength>();
+                else
+                    return new List<IPasswordStrength>();
+            });
+
+            _localizer = localizer.Value;
         }
 
         private ISendPasswordResetToken SinglePlugin(Lazy<IEnumerable<ISendPasswordResetToken>> plugins)
@@ -198,111 +85,80 @@ namespace Rhetos.AspNetFormsAuth
             return plugins.Value.Single();
         }
 
-        private void CheckPermissions(Claim claim)
+        private void CheckPermissions(Claim claim, string userName)
         {
             bool allowed = _authorizationManager.Value.GetAuthorizations(new[] { claim }).Single();
             if (!allowed)
                 throw new UserException(
                     "You are not authorized for action '{0}' on resource '{1}', user '{2}'. The required security claim is not set.",
-                    new[] { claim.Right, claim.Resource, WebSecurity.CurrentUserName },
+                    new[] { claim.Right, claim.Resource, userName },
                     null, null);
         }
 
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/Login", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public bool Login(LoginParameters parameters)
+        public async Task<bool> LogIn(string userName, string password, bool rememberMe)
         {
-            if (parameters == null)
-                throw new ClientException("It is not allowed to call this authentication service method with no parameters provided.");
-            _logger.Trace(() => "Login: " + parameters.UserName);
-            parameters.Validate();
-            CheckPasswordFailuresBeforeLogin(parameters.UserName);
+            _logger.Trace(() => $"Login: {userName}");
 
-            return SafeExecute(
-                () => WebSecurity.Login(parameters.UserName, parameters.Password, parameters.PersistCookie),
-                "Login", parameters.UserName);
+            ValidateNonEmptyString(userName, nameof(userName));
+            ValidateNonEmptyString(password, nameof(password));
+
+            var logInSucceeded = false;
+            await SafeExecute(
+                async () =>
+                {
+                    var loginResult = await _signInManager.PasswordSignInAsync(userName, password, rememberMe, lockoutOnFailure: true);
+                    logInSucceeded = loginResult.Succeeded;
+                }, "Login", userName);
+            return logInSucceeded;
         }
 
-        private void CheckPasswordFailuresBeforeLogin(string userName)
+        public async Task LogOut()
         {
-            foreach (var limit in _passwordAttemptsLimits.Value.OrderByDescending(l => l.TimeoutInSeconds))
-            {
-                int maxAttempts = limit.MaxInvalidPasswordAttempts ?? 0;
-                if (maxAttempts > 0)
-                    if (WebSecurity.IsAccountLockedOut(userName, maxAttempts - 1, limit.TimeoutInSeconds.Value)) // MaxInvalidPasswordAttempts value is corrected by 1 to work correctly.
-                    {
-                        _logger.Trace(() => "Account locked out: " + userName + ", attempts "
-                            + WebSecurity.GetPasswordFailuresSinceLastSuccess(userName) + "/" + limit.MaxInvalidPasswordAttempts
-                            + ", timeout " + limit.TimeoutInSeconds + ".");
+            _logger.Trace(() => $"LogOut");
 
-                        string localizedMessage = _localizer["Your account is temporarily locked out because of too many failed login attempts."];
-                        int timeoutMinutes = (int)Math.Ceiling((double)limit.TimeoutInSeconds / 60);
-                        if (timeoutMinutes == 1)
-                            localizedMessage += " " + _localizer["Please try again in a minute or contact your system administrator."];
-                        else if (timeoutMinutes > 1 && timeoutMinutes <= 300)
-                            localizedMessage += " " + _localizer["Please try again in {0} minutes or contact your system administrator.", timeoutMinutes];
-                        else
-                            localizedMessage += " " + _localizer["Please contact your system administrator."];
-
-                        throw new UserException(localizedMessage);
-                    }
-            }
+            await SafeExecute(
+                async () => await _signInManager.SignOutAsync(),
+                "Logout", "");
+            ;
         }
 
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/Logout", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public void Logout()
+        public async Task SetPassword(string userName, string password, bool ignorePasswordStrengthPolicy)
         {
-            _logger.Trace(() => "Logout: " + WebSecurity.CurrentUserName);
+            _logger.Trace(() => "SetPassword: " + password);
 
-            SafeExecute(() => WebSecurity.Logout(), "Logout", WebSecurity.CurrentUserName);
-        }
+            CheckPermissions(AuthenticationServiceClaims.SetPasswordClaim, userName);
 
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/SetPassword", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public void SetPassword(SetPasswordParameters parameters)
-        {
-            if (parameters == null)
-                throw new ClientException("It is not allowed to call this authentication service method with no parameters provided.");
-            _logger.Trace(() => "SetPassword: " + parameters.UserName);
-            CheckPermissions(AuthenticationServiceClaims.SetPasswordClaim);
-            parameters.Validate();
-            if (parameters.IgnorePasswordStrengthPolicy)
-                CheckPermissions(AuthenticationServiceClaims.IgnorePasswordStrengthPolicyClaim);
+            ValidateNonEmptyString(userName, nameof(userName));
+            ValidateNonEmptyString(password, nameof(password));
+
+            if (ignorePasswordStrengthPolicy)
+                CheckPermissions(AuthenticationServiceClaims.IgnorePasswordStrengthPolicyClaim, userName);
             else
-                CheckPasswordStrength(parameters.Password);
+                CheckPasswordStrength(password);
 
-            if (!WebSecurity.UserExists(parameters.UserName))
-                throw new UserException("User '{0}' is not registered.", new[] { parameters.UserName }, null, null); // Providing this information is not a security issue, because this method requires admin credentials (SetPasswordClaim).
-
-            if (!IsAccountCreated(parameters.UserName))
-            {
-                WebSecurity.CreateAccount(parameters.UserName, parameters.Password);
-                _logger.Trace("Password successfully initialized.");
-            }
-            else
-            {
-                var token = WebSecurity.GeneratePasswordResetToken(parameters.UserName);
-                var changed = WebSecurity.ResetPassword(token, parameters.Password);
-                if (!changed)
-                    throw new UserException("Cannot change password.", "WebSecurity.ResetPassword returned 'false'.");
-                _logger.Trace("Password successfully changed.");
-            }
+            await SafeExecute(
+                async () => {
+                    var user = await _userManager.FindByNameAsync(userName);
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    return await _userManager.ResetPasswordAsync(user, token, password);
+                }, "Set password", userName);
         }
 
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/ChangeMyPassword", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public bool ChangeMyPassword(ChangeMyPasswordParameters parameters)
+        public async Task<bool> ChangeMyPassword(string userName, string oldPassword, string newPassword)
         {
-            if (parameters == null)
-                throw new ClientException("It is not allowed to call this authentication service method with no parameters provided.");
-            _logger.Trace(() => "ChangeMyPassword: " + WebSecurity.CurrentUserName);
-            parameters.Validate();
-            CheckPasswordStrength(parameters.NewPassword);
+            _logger.Trace(() => "ChangeMyPassword");
 
-            return SafeExecute(
-                () => WebSecurity.ChangePassword(WebSecurity.CurrentUserName, parameters.OldPassword, parameters.NewPassword),
-                "ChangeMyPassword", WebSecurity.CurrentUserName);
+            ValidateNonEmptyString(userName, nameof(userName));
+            ValidateNonEmptyString(oldPassword, nameof(oldPassword));
+            ValidateNonEmptyString(newPassword, nameof(newPassword));
+
+            CheckPasswordStrength(newPassword);
+
+            return await SafeExecute(
+                async () => {
+                    var user = await _userManager.FindByNameAsync(userName);
+                    return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+                }, "ChangeMyPassword", userName);
         }
 
         private void CheckPasswordStrength(string password)
@@ -318,96 +174,49 @@ namespace Rhetos.AspNetFormsAuth
             }
         }
 
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/UnlockUser", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public void UnlockUser(UnlockUserParameters parameters)
+        public async Task UnlockUser(string userName)
         {
-            if (parameters == null)
-                throw new ClientException("It is not allowed to call this authentication service method with no parameters provided.");
-            _logger.Trace(() => "UnlockUser: " + parameters.UserName);
-            CheckPermissions(AuthenticationServiceClaims.UnlockUserClaim);
-            parameters.Validate();
+            _logger.Trace(() => "UnlockUser: " + userName);
+            ValidateNonEmptyString(userName, nameof(userName));
+            CheckPermissions(AuthenticationServiceClaims.UnlockUserClaim, userName);
 
-            string sql = string.Format(UnlockUserSql, SqlUtility.QuoteText(parameters.UserName));
-            _sqlExecuter.Value.ExecuteSql(new[] { sql });
+            await SafeExecute(
+                async () =>
+                {
+                    var user = await _userManager.FindByNameAsync(userName);
+                    return await _userManager.SetLockoutEndDateAsync(user, new DateTimeOffset(DateTime.UtcNow));
+                }, "Unlock user", userName);
         }
 
-        private const string UnlockUserSql = @"UPDATE
-                wm
-            SET
-                PasswordFailuresSinceLastSuccess = 0
-            FROM
-                webpages_Membership wm
-                INNER JOIN Common.Principal p ON p.AspNetUserId = wm.UserId
-            WHERE
-                p.Name = {0}";
-
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/GeneratePasswordResetToken", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public string GeneratePasswordResetToken(GeneratePasswordResetTokenParameters parameters)
+        public async Task<string> GeneratePasswordResetToken(string userName)
         {
-            if (parameters == null)
-                throw new ClientException("It is not allowed to call this authentication service method with no parameters provided.");
-            _logger.Trace(() => "GeneratePasswordResetToken: " + parameters.UserName);
-            CheckPermissions(AuthenticationServiceClaims.GeneratePasswordResetTokenClaim);
-            parameters.Validate();
-
-            return GeneratePasswordResetTokenInternal(parameters);
+            _logger.Trace(() => "GeneratePasswordResetToken: " + userName);
+            CheckPermissions(AuthenticationServiceClaims.GeneratePasswordResetTokenClaim, userName);
+            ValidateNonEmptyString(userName, nameof(userName));
+            return await GeneratePasswordResetTokenInternal(userName);
         }
 
-        private string GeneratePasswordResetTokenInternal(GeneratePasswordResetTokenParameters parameters)
+        private async Task<string> GeneratePasswordResetTokenInternal(string userName)
         {
-            if (!WebSecurity.UserExists(parameters.UserName)) // Providing this information is not a security issue, because this method requires admin credentials (GeneratePasswordResetTokenClaim).
-                throw new UserException("User '{0}' is not registered.", new[] { parameters.UserName }, null, null);
+            if (!DoesUserExists(userName)) // Providing this information is not a security issue, because this method requires admin credentials (GeneratePasswordResetTokenClaim).
+                throw new UserException("User '{0}' is not registered.", new[] { userName }, null, null);
 
-            if (!IsAccountCreated(parameters.UserName))
-            {
-                _logger.Trace(() => "GeneratePasswordResetTokenInternal creating security account: " + parameters.UserName);
-                WebSecurity.CreateAccount(parameters.UserName, Guid.NewGuid().ToString());
-            }
-
-            return parameters.TokenExpirationInMinutesFromNow != 0
-                ? WebSecurity.GeneratePasswordResetToken(parameters.UserName, parameters.TokenExpirationInMinutesFromNow)
-                : WebSecurity.GeneratePasswordResetToken(parameters.UserName, GeneratePasswordResetTokenParameters.DefaultTokenExpirationInMinutes);
+            var user = await _userManager.FindByNameAsync(userName);
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
         }
 
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/SendPasswordResetToken", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public void SendPasswordResetToken(SendPasswordResetTokenParameters parameters)
+        public async Task SendPasswordResetToken(string userName, Dictionary<string, string> additionalClientInfo)
         {
-            if (parameters == null)
-                throw new ClientException("It is not allowed to call this authentication service method with no parameters provided.");
-            _logger.Trace("SendPasswordResetToken " + parameters.UserName);
-            parameters.Validate();
-
+            _logger.Trace("SendPasswordResetToken " + userName);
+            ValidateNonEmptyString(userName, nameof(userName));
             const string logErrorFormat = "SendPasswordResetToken failed for {0}: {1}";
 
             try
             {
-                string passwordResetToken;
-                try
-                {
-                    var tokenParameters = new GeneratePasswordResetTokenParameters
-                    {
-                        UserName = parameters.UserName,
-                        TokenExpirationInMinutesFromNow = Int32.Parse(ConfigUtility.GetAppSetting("AspNetFormsAuth.SendPasswordResetToken.ExpirationInMinutes") ?? "1440")
-                    };
-                    passwordResetToken = GeneratePasswordResetTokenInternal(tokenParameters);
-                }
-                // Providing an error information to the client might be a security issue, because this method allows anonymous access.
-                catch (UserException ex)
-                {
-                    _logger.Trace(logErrorFormat, parameters.UserName, ex);
-                    return;
-                }
-                catch (ClientException ex)
-                {
-                    _logger.Info(logErrorFormat, parameters.UserName, ex);
-                    return;
-                }
-
+                var user = await _userManager.FindByNameAsync(userName);
+                var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
                 // The plugin may choose it's own client error messages (UserException and ClientException will not be suppressed).
-                _sendPasswordResetTokenPlugin.Value.SendPasswordResetToken(parameters.UserName, parameters.AdditionalClientInfo, passwordResetToken);
+                _sendPasswordResetTokenPlugin.Value.SendPasswordResetToken(userName, additionalClientInfo, passwordResetToken);
             }
             catch (Exception ex)
             {
@@ -415,82 +224,100 @@ namespace Rhetos.AspNetFormsAuth
                     ExceptionsUtility.Rethrow(ex);
 
                 // Don't return an internal error to the client. Log it and return a generic error message:
-                _logger.Error(logErrorFormat, parameters.UserName, ex);
+                _logger.Error(logErrorFormat, userName, ex);
                 throw new FrameworkException(FrameworkException.GetInternalServerErrorMessage(_localizer, ex));
             }
         }
 
-        /// <summary>
-        /// This method is similar to SetPassword, but there is a difference in access permissions.
-        /// ResetPassword allows anonymous access, while SetPassword needs a specific authorization.
-        /// </summary>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        [OperationContract]
-        [WebInvoke(Method = "POST", UriTemplate = "/ResetPassword", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
-        public bool ResetPassword(ResetPasswordParameters parameters)
+        public async Task<bool> ResetPassword(string userName,string newPassword, string resetPasswordToken)
         {
-            if (parameters == null)
-                throw new ClientException("It is not allowed to call this authentication service method with no parameters provided.");
             _logger.Trace("ResetPassword");
-            parameters.Validate();
-            CheckPasswordStrength(parameters.NewPassword);
 
-            int userId = WebSecurity.GetUserIdFromPasswordResetToken(parameters.PasswordResetToken);
-            SimpleMembershipProvider provider = (SimpleMembershipProvider)Membership.Provider;
-            string userName = provider.GetUserNameFromId(userId);
-            _logger.Trace(() => "ResetPassword " + userName);
+            ValidateNonEmptyString(userName, nameof(userName));
+            ValidateNonEmptyString(newPassword, nameof(newPassword));
+            ValidateNonEmptyString(resetPasswordToken, nameof(resetPasswordToken));
 
-            bool successfulReset = SafeExecute(
-                () => WebSecurity.ResetPassword(parameters.PasswordResetToken, parameters.NewPassword),
-                "ResetPassword", userName);
+            CheckPasswordStrength(newPassword);
 
-            if (successfulReset && !string.IsNullOrEmpty(userName))
-                SafeExecute( // Login does not need to be successful for this function to return true.
-                    () => { Login(new LoginParameters { UserName = userName, Password = parameters.NewPassword, PersistCookie = false }); },
+            IdentityUser<Guid> user = null;
+            bool successfulReset = await SafeExecute(
+                async () =>
+                {
+                    user = await _userManager.FindByNameAsync(userName);
+                    return await _userManager.ResetPasswordAsync(user, resetPasswordToken, newPassword);
+                }, "ResetPassword", userName);
+
+            if (successfulReset && user != null)
+                await SafeExecute( // Login does not need to be successful for this function to return true.
+                    async () => { await _signInManager.SignInAsync(user, false); },
                     "Login after ResetPassword", userName);
 
             return successfulReset;
         }
 
-        //==================================================
-
-        bool IsAccountCreated(string userName)
+        bool DoesUserExists(string userName)
         {
-            string sql = string.Format(IsAccountCreatedSql, SqlUtility.QuoteText(userName));
+            string sql = string.Format(DoesUserExistsSql, SqlUtility.QuoteText(userName));
             bool exists = false;
             _sqlExecuter.Value.ExecuteReader(sql, reader => exists = true);
             return exists;
         }
 
-        const string IsAccountCreatedSql =
+        const string DoesUserExistsSql =
             @"SELECT TOP 1 1 FROM Common.Principal cp
-                INNER JOIN webpages_Membership wm
-                    ON wm.UserId = cp.AspNetUserId
             WHERE cp.Name = {0}";
 
-        bool SafeExecute(Func<bool> action, string actionName, string context)
+        private void ValidateNonEmptyString(string value, string fieldName)
         {
-            bool success;
-            try
-            {
-                success = action();
-                if (!success)
-                    _logger.Trace(() => actionName + " failed: " + context);
-            }
-            catch (Exception ex)
-            {
-                success = false;
-                _logger.Info(() => actionName + " failed: " + context + ", " + ex);
-            }
-            return success;
+            if (string.IsNullOrWhiteSpace(value))
+                throw new UserException($"Empty {fieldName} is not allowed.");
         }
 
-        bool SafeExecute(Action action, string actionName, string context)
+        private string GetIdentityResultErrorSummary(IdentityResult identityResult)
+        {
+            var errorSummary = new StringBuilder();
+            if (!identityResult.Succeeded)
+            {
+                foreach (var identityError in identityResult.Errors)
+                {
+                    errorSummary.AppendLine($"Code: {identityError.Code}, Description: {identityError.Description}");
+                }
+            }
+
+            return errorSummary.ToString();
+        }
+
+        /// <summary>
+        /// Runs the action in a try/catch block and returns true if the execution completes without any exception
+        /// and the action returns true for <see cref="IdentityResult.Succeeded"/>.
+        /// Otherwise it returns false.
+        /// It logs the exception to the Info log.
+        /// If the <see cref="IdentityResult.Succeeded"/> is fase it logs the <see cref="IdentityResult.Errors"/> to the Trace log.
+        /// </summary>
+        async Task<bool> SafeExecute(Func<Task<IdentityResult>> action, string actionName, string context)
+        {
+            IdentityResult identityResult = IdentityResult.Failed();
+            var executionSuccesfullyCompleted = await SafeExecute(
+                async () =>
+                {
+                    identityResult = await action();
+                    if (!identityResult.Succeeded)
+                        _logger.Trace(() => actionName + " failed: " + context + Environment.NewLine + GetIdentityResultErrorSummary(identityResult));
+                }, actionName, context);
+
+            return executionSuccesfullyCompleted && identityResult.Succeeded;
+        }
+
+        /// <summary>
+        /// Runs the action in a try/catch block and returns true if the execution completes without any exception.
+        /// Otherwise it returns false.
+        /// It logs the exception to the Info log.
+        /// </summary>
+        async Task<bool> SafeExecute(Func<Task> action, string actionName, string context)
         {
             try
             {
-                action();
+                await action();
                 return true;
             }
             catch (Exception ex)

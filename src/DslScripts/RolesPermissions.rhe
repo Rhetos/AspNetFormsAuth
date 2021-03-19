@@ -24,6 +24,74 @@
         SqlDependsOn Common.Principal;
     }
     
+    //This is the tables used by WebMatrix.WebData to store user authorization information
+	SqlObject webpages_Membership 
+        'IF (NOT EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = ''dbo'' 
+                 AND  TABLE_NAME = ''webpages_Membership''))
+            BEGIN
+                CREATE TABLE [dbo].[webpages_Membership](
+                    [UserId] [int] NOT NULL,
+                    [CreateDate] [datetime] NULL,
+                    [ConfirmationToken] [nvarchar](128) NULL,
+                    [IsConfirmed] [bit] NULL,
+                    [LastPasswordFailureDate] [datetime] NULL,
+                    [PasswordFailuresSinceLastSuccess] [int] NOT NULL,
+                    [Password] [nvarchar](128) NOT NULL,
+                    [PasswordChangedDate] [datetime] NULL,
+                    [PasswordSalt] [nvarchar](128) NOT NULL,
+                    [PasswordVerificationToken] [nvarchar](128) NULL,
+                    [PasswordVerificationTokenExpirationDate] [datetime] NULL,
+                PRIMARY KEY CLUSTERED 
+                (
+                    [UserId] ASC
+                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                ) ON [PRIMARY]
+
+                ALTER TABLE [dbo].[webpages_Membership] ADD  DEFAULT ((0)) FOR [IsConfirmed]
+                
+                ALTER TABLE [dbo].[webpages_Membership] ADD  DEFAULT ((0)) FOR [PasswordFailuresSinceLastSuccess]
+            END'
+        ''
+    {
+        SqlDependsOn Common.Principal;
+    }
+
+    //This is the tables used by WebMatrix.WebData to store user authorization information
+	SqlObject webpages_MembershipDefaultValueForCreateDate
+        'ALTER TABLE [dbo].[webpages_Membership] ADD CONSTRAINT df_CreateDate DEFAULT GETDATE() FOR [CreateDate]'
+        'ALTER TABLE [dbo].[webpages_Membership] DROP CONSTRAINT df_CreateDate'
+    {
+        SqlDependsOnSqlObject Common.webpages_Membership;
+    }
+
+	SqlObject webpages_MembershipLockoutEndColumn
+        'ALTER TABLE [dbo].[webpages_Membership] ADD [LockoutEnd] [datetime]'
+        'ALTER TABLE [dbo].[webpages_Membership] DROP COLUMN [LockoutEnd]'
+    {
+        SqlDependsOnSqlObject Common.webpages_Membership;
+    }
+
+    SqlObject webpages_MembershipSetPasswordChangedDate
+        'CREATE TRIGGER [dbo].[tr_webpages_Membership_PasswordModification]
+            ON [dbo].[webpages_Membership]
+            AFTER INSERT, UPDATE
+            AS BEGIN
+                UPDATE [dbo].[webpages_Membership] 
+                SET
+                    PasswordChangedDate = GETDATE()
+                FROM
+                    [dbo].[webpages_Membership] m
+                    INNER JOIN inserted i ON m.UserId = i.UserId
+                    LEFT JOIN deleted d ON m.UserId = d.UserId
+                WHERE d.Password <> i.Password OR (d.Password IS NULL AND i.Password IS NOT NULL) OR (d.Password IS NOT NULL AND i.Password IS NULL)
+            END'
+        'DROP TRIGGER [dbo].[tr_webpages_Membership_PasswordModification]'
+    {
+        SqlDependsOnSqlObject Common.webpages_Membership;
+    }
+
 	// The trigger generates unique AspNetUserId that does not exist in webpages_Membership nor Principal.
     SqlTrigger Principal.'GenerateAspNetUserId' 'INSTEAD OF INSERT'
         "DECLARE @Error INT;

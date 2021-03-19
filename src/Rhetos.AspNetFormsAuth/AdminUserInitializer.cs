@@ -18,8 +18,6 @@
 */
 
 using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Logging;
-using Rhetos.Persistence;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
@@ -29,6 +27,9 @@ namespace Rhetos.AspNetFormsAuth
     [Export(typeof(Rhetos.Extensibility.IServerInitializer))]
     public class AdminUserInitializer : Rhetos.Extensibility.IServerInitializer
     {
+        public const string AdminUserName = "admin";
+        public const string AdminRoleName = "SecurityAdministrator";
+
         private readonly GenericRepositories _repositories;
 
         public AdminUserInitializer(GenericRepositories repositories)
@@ -39,11 +40,11 @@ namespace Rhetos.AspNetFormsAuth
         public void Initialize()
         {
             var adminPrincipal = _repositories.CreateInstance<IPrincipal>();
-            adminPrincipal.Name = AuthenticationDatabaseInitializer.AdminUserName;
+            adminPrincipal.Name = AdminUserName;
             _repositories.InsertOrReadId(adminPrincipal, item => item.Name);
 
             var adminRole = _repositories.CreateInstance<IRole>();
-            adminRole.Name = AuthenticationDatabaseInitializer.AdminRoleName;
+            adminRole.Name = AdminRoleName;
             _repositories.InsertOrReadId(adminRole, item => item.Name);
 
             var adminPrincipalHasRole = _repositories.CreateInstance<IPrincipalHasRole>();

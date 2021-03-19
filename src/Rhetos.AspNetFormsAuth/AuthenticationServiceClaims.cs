@@ -21,11 +21,8 @@ using Rhetos.Dsl;
 using Rhetos.Extensibility;
 using Rhetos.Processing;
 using Rhetos.Security;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 
 namespace Rhetos.AspNetFormsAuth
 {
