@@ -47,7 +47,7 @@ namespace Rhetos.AspNetFormsAuth.TestApp
 
             // Adding Rhetos to AspNetCore application
             services.AddRhetos(rhetosHostBuilder => ConfigureRhetosHostBuilder(rhetosHostBuilder, Configuration))
-                .AddAspNetFormsAuth(false);
+                .AddAspNetFormsAuth(true);
             // Done adding Rhetos
 
             services.AddSwaggerGen(c =>

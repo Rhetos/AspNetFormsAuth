@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.Interfaces", "src\Rhetos.AspNetFormsAuth.Interfaces\Rhetos.AspNetFormsAuth.Interfaces.csproj", "{B818F493-EF0C-448F-A89F-FC805FFA879E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth.TestApp", "test\Rhetos.AspNetFormsAuth.TestApp\Rhetos.AspNetFormsAuth.TestApp.csproj", "{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.TestApp", "test\Rhetos.AspNetFormsAuth.TestApp\Rhetos.AspNetFormsAuth.TestApp.csproj", "{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth.Test", "test\Rhetos.AspNetFormsAuth.Test\Rhetos.AspNetFormsAuth.Test.csproj", "{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
