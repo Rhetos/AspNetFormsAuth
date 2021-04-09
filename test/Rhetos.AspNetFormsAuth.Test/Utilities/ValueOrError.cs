@@ -55,7 +55,12 @@ namespace Rhetos.AspNetFormsAuth.Test
         private readonly string _error;
         public string Error
         {
-            get { return _error; }
+            get
+            {
+                if (!IsError)
+                    throw new FrameworkException(Error + " Reading the Error property while the Value property is set.");
+                return _error;
+            }
         }
 
         public bool IsError { get; private set; }

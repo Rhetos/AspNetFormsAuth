@@ -40,13 +40,13 @@ namespace Rhetos.AspNetFormsAuth
         {
             var userStoreType = nameof(IUserStore<IdentityUser<Guid>>);
             var userManagerType = nameof(UserManager<IdentityUser<Guid>>);
-            throw new NotImplementedException($"This ipmlementation of the {userStoreType} expects to have the Common.Principal already created." +
+            throw new NotSupportedException($"This ipmlementation of the {userStoreType} expects to have the Common.Principal already created." +
                     $" Use the DomRepository class to create the Common.Principal and then find and update the user data with the {userManagerType} class.");
         }
 
         public Task<IdentityResult> DeleteAsync(IdentityUser<Guid> user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException($"This implementation of the {nameof(IUserStore<IdentityUser<Guid>>)} does not support the deletion of the user. Use the DomRepository class to delete the user.");
+            throw new NotSupportedException($"This implementation of the {nameof(IUserStore<IdentityUser<Guid>>)} does not support the deletion of the user. Use the DomRepository class to delete the user.");
         }
 
         public async Task<IdentityResult> UpdateAsync(IdentityUser<Guid> user, CancellationToken cancellationToken)
@@ -73,7 +73,7 @@ namespace Rhetos.AspNetFormsAuth
                     return IdentityResult.Failed(new IdentityError { Description = "There is no Principal with the requested Id." });
 
                 var principal = principals.First();
-                if (principals.Count > 0 && !principal.AspNetUserId.HasValue)
+                if (!principal.AspNetUserId.HasValue)
                     return IdentityResult.Failed(new IdentityError { Description = "The value for AspNetUserId in Common.Principal was not set for the requested user." });
 
                 if (principal.HasMembership.Value == true)
@@ -88,13 +88,17 @@ namespace Rhetos.AspNetFormsAuth
                             dbo.webpages_Membership m
                             LEFT JOIN Common.Principal cp ON cp.AspNetUserId = m.UserId
                         WHERE cp.ID = @0",
-                        user.Id, user.AccessFailedCount, user.PasswordHash, user.LockoutEnd == null ? null : user.LockoutEnd.Value.DateTime);
+                        user.Id, user.AccessFailedCount,
+                        user.PasswordHash ?? string.Empty,
+                        user.LockoutEnd == null ? null : user.LockoutEnd.Value.DateTime);
                 }
                 else
                 {
                     await persistenceTransaction.Value.ExecuteNonQueryAsync(@"
                         INSERT INTO dbo.webpages_Membership (UserId, PasswordFailuresSinceLastSuccess, Password, PasswordSalt, LockoutEnd) VALUES(@0, @1, @2, @3,@4)",
-                        principal.AspNetUserId.Value, user.AccessFailedCount, user.PasswordHash, string.Empty, user.LockoutEnd);
+                        principal.AspNetUserId.Value, user.AccessFailedCount,
+                        user.PasswordHash ?? string.Empty, string.Empty,
+                        user.LockoutEnd == null ? null : user.LockoutEnd.Value.DateTime);
                 }
 
                 return IdentityResult.Success;
@@ -147,7 +151,7 @@ namespace Rhetos.AspNetFormsAuth
                 return new IdentityUser<Guid>
                 {
                     Id = reader.GetGuid(0),
-                    PasswordHash = reader.IsDBNull(1) ? null : reader.GetString(1),
+                    PasswordHash = reader.IsDBNull(1) ? null : ReturnNullIfStringIsEmpty(reader.GetString(1)),
                     AccessFailedCount = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
                     UserName = reader.IsDBNull(3) ? null : reader.GetString(3),
                     LockoutEnd = reader.IsDBNull(4) ? null : DateTime.SpecifyKind(reader.GetDateTime(4), DateTimeKind.Utc),
@@ -156,6 +160,16 @@ namespace Rhetos.AspNetFormsAuth
             });
 
             return results.FirstOrDefault();
+        }
+
+        //ASP.NET IDentity interprets a non null string as if the password has been set
+        //Because the Password field in the dbo.webpages_Membership table is required
+        //we are interpreting an empty string as null
+        private string ReturnNullIfStringIsEmpty(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return null;
+            return s;
         }
 
         public Task<string> GetNormalizedUserNameAsync(IdentityUser<Guid> user, CancellationToken cancellationToken)
@@ -296,13 +310,7 @@ namespace Rhetos.AspNetFormsAuth
 
         public Task SetLockoutEnabledAsync(IdentityUser<Guid> user, bool enabled, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-            user.LockoutEnabled = enabled;
-            return Task.CompletedTask;
+            throw new NotSupportedException($"Setting the ${nameof(IdentityUser<Guid>.LockoutEnabled)} property is not allowed.");
         }
     }
 }

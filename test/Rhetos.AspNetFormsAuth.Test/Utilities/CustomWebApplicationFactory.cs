@@ -19,9 +19,7 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Rhetos.Host.AspNet;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Http;
 
 namespace Rhetos.AspNetFormsAuth.Test
 {
@@ -31,7 +29,7 @@ namespace Rhetos.AspNetFormsAuth.Test
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureServices(services =>
-                services.Configure<RhetosBuilderOptions>(o => o.rhetosHostBuilderConfigureActions.Add(ConfigureRhetos))
+                services.AddRhetos(ConfigureRhetos)
             );
         }
 

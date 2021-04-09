@@ -74,7 +74,9 @@ namespace AdminSetup
         {
             var rootCommand = new RootCommand();
             rootCommand.Add(new Argument<FileInfo>("startup-assembly") { Description = "Startup assembly of the host application." });
-            rootCommand.Add(new Argument<string>("password") { Description = "Administrator password." });
+            var passwordArgument = new Option<string>("--password", "Administrator password.");
+            passwordArgument.Required = true;
+            rootCommand.Add(passwordArgument);
             //Lack of this switch means that the dbupdate command should start the command rhetos.exe dbupdate
             //in another process with the host applications runtimeconfig.json and deps.json files
             var executeCommandInCurrentProcessOption = new Option<bool>(ExecuteCommandInCurrentProcessOptionName);
