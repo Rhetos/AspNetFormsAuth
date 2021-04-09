@@ -15,8 +15,4 @@
     <PackageReference Include="Rhetos.RestGenerator" Version="5.0.0-dev*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Rhetos.AspNetFormsAuth.Interfaces\Rhetos.AspNetFormsAuth.Interfaces.csproj" />
-  </ItemGroup>
-
 </Project>

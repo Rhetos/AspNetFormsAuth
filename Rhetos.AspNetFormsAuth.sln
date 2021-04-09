@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminSetup", "src\AdminSetup\AdminSetup.csproj", "{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdminSetup", "src\AdminSetup\AdminSetup.csproj", "{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth", "src\Rhetos.AspNetFormsAuth\Rhetos.AspNetFormsAuth.csproj", "{8CE0595E-B553-48D0-8848-9ECB254B2973}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.Interfaces", "src\Rhetos.AspNetFormsAuth.Interfaces\Rhetos.AspNetFormsAuth.Interfaces.csproj", "{B818F493-EF0C-448F-A89F-FC805FFA879E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.TestApp", "test\Rhetos.AspNetFormsAuth.TestApp\Rhetos.AspNetFormsAuth.TestApp.csproj", "{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth.Test", "test\Rhetos.AspNetFormsAuth.Test\Rhetos.AspNetFormsAuth.Test.csproj", "{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.Test", "test\Rhetos.AspNetFormsAuth.Test\Rhetos.AspNetFormsAuth.Test.csproj", "{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +25,6 @@ Global
 		{8CE0595E-B553-48D0-8848-9ECB254B2973}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CE0595E-B553-48D0-8848-9ECB254B2973}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CE0595E-B553-48D0-8848-9ECB254B2973}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Release|Any CPU.ActiveCfg = Release|Any CPU

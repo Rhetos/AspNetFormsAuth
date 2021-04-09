@@ -33,8 +33,6 @@
     <file src="src\DslScripts\**\*" target="DslScripts" />
     <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.dll" target="lib\net5.0" />
     <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.pdb" target="lib\net5.0" />
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.Interfaces.dll" target="lib\net5.0" />
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.Interfaces.pdb" target="lib\net5.0" />
 
     <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.exe" target="contentFiles/any/any" />
     <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.dll" target="contentFiles/any/any" />
