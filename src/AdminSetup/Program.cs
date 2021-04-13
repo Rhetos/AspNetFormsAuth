@@ -33,6 +33,9 @@ using Rhetos.Persistence;
 using System.Reflection;
 using Rhetos.Security;
 using System.Linq;
+using System.Text;
+using System.Security.Principal;
+using System.Runtime.InteropServices;
 
 namespace AdminSetup
 {
@@ -59,6 +62,11 @@ namespace AdminSetup
             {
                 Console.WriteLine();
                 Console.WriteLine(errorMessage);
+
+                Console.WriteLine();
+                Console.Write("Press any key to continue . . .");
+                Console.ReadKey(true);
+
                 return 1;
             }
 
@@ -74,9 +82,7 @@ namespace AdminSetup
         {
             var rootCommand = new RootCommand();
             rootCommand.Add(new Argument<FileInfo>("startup-assembly") { Description = "Startup assembly of the host application." });
-            var passwordArgument = new Option<string>("--password", "Administrator password.");
-            passwordArgument.Required = true;
-            rootCommand.Add(passwordArgument);
+            rootCommand.Add(new Option<string>("--password", "Administrator password."));
             //Lack of this switch means that the dbupdate command should start the command rhetos.exe dbupdate
             //in another process with the host applications runtimeconfig.json and deps.json files
             var executeCommandInCurrentProcessOption = new Option<bool>(ExecuteCommandInCurrentProcessOptionName);
@@ -85,7 +91,7 @@ namespace AdminSetup
             rootCommand.Handler =
                 CommandHandler.Create((FileInfo startupAssembly, string password, bool executeCommandInCurrentProcess) => {
                     if (executeCommandInCurrentProcess)
-                        return ExecuteCommands(startupAssembly.FullName, password);
+                        return ExecuteCommand(startupAssembly.FullName, password);
                     else
                         return InvokeAsExternalProcess(startupAssembly.FullName, args);
                 });
@@ -93,7 +99,7 @@ namespace AdminSetup
             rootCommand.Invoke(args);
         }
 
-        private int ExecuteCommands(string rhetosHostAssemblyPath, string password)
+        private int ExecuteCommand(string rhetosHostAssemblyPath, string password)
         {
             var host = GetHostBuilder(rhetosHostAssemblyPath)
                 .ConfigureServices(serviceCollection => serviceCollection.AddScoped<IUserInfo, ProcessUserInfo>())
@@ -110,6 +116,10 @@ namespace AdminSetup
 
         private void SetUpAdminAccount(IServiceProvider scope, string password)
         {
+            CheckElevatedPrivileges();
+
+            string adminPassword = string.IsNullOrWhiteSpace(password) ? InputPassword() : password;
+
             const string adminUserName = AdminUserInitializer.AdminUserName;
 
             var userManager = scope.GetService<UserManager<IdentityUser<Guid>>>();
@@ -125,7 +135,7 @@ namespace AdminSetup
             var user = userManager.FindByNameAsync(adminUserName).Result;
 
             var token = userManager.GeneratePasswordResetTokenAsync(user).Result;
-            var changedPasswordResults = userManager.ResetPasswordAsync(user, token, password).Result;
+            var changedPasswordResults = userManager.ResetPasswordAsync(user, token, adminPassword).Result;
 
             if (!changedPasswordResults.Succeeded)
                 throw new ApplicationException($"Cannot change password. ResetPassword failed with errors: {string.Join(Environment.NewLine, changedPasswordResults.Errors.Select(x => x.Description))}.");
@@ -160,6 +170,78 @@ namespace AdminSetup
                 throw new FrameworkException($"Static method '{entryPointType.FullName}.{HostBuilderFactoryMethodName}' has incorrect return type. Expected return type is {nameof(IHostBuilder)}.");
 
             return (IHostBuilder)method.InvokeEx(null, new object[] { new string[0] });
+        }
+
+        private static void CheckElevatedPrivileges()
+        {
+            //Checking for admin privileges is only supported on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                bool elevated;
+                try
+                {
+                    WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+                    elevated = principal.IsInRole(WindowsBuiltInRole.Administrator);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.GetType() + ": " + ex.Message);
+                    elevated = false;
+                }
+
+                if (!elevated)
+                    throw new ApplicationException(System.Diagnostics.Process.GetCurrentProcess().ProcessName + " has to be executed with elevated privileges (as administrator).");
+            }
+        }
+
+        private static string InputPassword()
+        {
+            var oldFg = Console.ForegroundColor;
+            var oldBg = Console.BackgroundColor;
+            try
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
+
+                var buildPwd = new StringBuilder();
+                ConsoleKeyInfo key;
+
+                Console.WriteLine();
+                Console.Write("Enter new password for user 'admin': ");
+                do
+                {
+                    key = Console.ReadKey(true);
+
+                    if (((int)key.KeyChar) >= 32)
+                    {
+                        buildPwd.Append(key.KeyChar);
+                        Console.Write("*");
+                    }
+                    else if (key.Key == ConsoleKey.Backspace && buildPwd.Length > 0)
+                    {
+                        buildPwd.Remove(buildPwd.Length - 1, 1);
+                        Console.Write("\b \b");
+                    }
+                    else if (key.Key == ConsoleKey.Escape)
+                    {
+                        Console.WriteLine();
+                        throw new ApplicationException("User pressed the escape key.");
+                    }
+
+                } while (key.Key != ConsoleKey.Enter);
+                Console.WriteLine();
+
+                string pwd = buildPwd.ToString();
+                if (string.IsNullOrWhiteSpace(pwd))
+                    throw new ApplicationException("The password may not be empty.");
+
+                return pwd;
+            }
+            finally
+            {
+                Console.ForegroundColor = oldFg;
+                Console.BackgroundColor = oldBg;
+            }
         }
     }
 }
