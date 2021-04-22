@@ -38,28 +38,23 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Adds the <see cref="AuthenticationController"/> to the controller feature.
         /// </summary>
         /// <param name="builder"></param>
-        /// <param name="useRegexRulesForPasswordStrengthCheck">If set to true it uses RegularExpression value in the Common.AspNetFormsAuthPasswordStrength table to check the password strength.
-        /// Otherwise it uses the <see cref="IdentityOptions.Password"/> to validate the password.</param>
         /// <returns></returns>
-        public static RhetosAspNetServiceCollectionBuilder AddAspNetFormsAuth(this RhetosAspNetServiceCollectionBuilder builder, bool useRegexRulesForPasswordStrengthCheck)
+        public static RhetosAspNetServiceCollectionBuilder AddAspNetFormsAuth(this RhetosAspNetServiceCollectionBuilder builder)
         {
             builder.Services.AddIdentityCore<IdentityUser<Guid>>(options =>
                 {
-                    if (useRegexRulesForPasswordStrengthCheck)
-                    {
-                        options.Password.RequireDigit = false;
-                        options.Password.RequireLowercase = false;
-                        options.Password.RequireNonAlphanumeric = false;
-                        options.Password.RequireUppercase = false;
-                        options.Password.RequiredLength = 1;
-                    }
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 1;
+                    options.User.AllowedUserNameCharacters = "";
                 })
                 .AddUserStore<RhetosUserStore>()
                 .AddDefaultTokenProviders()
                 .AddSignInManager<SignInManager<IdentityUser<Guid>>>();
 
             builder.Services.TryAddScoped<ISecurityStampValidator, SecurityStampValidator<IdentityUser<Guid>>>();
-            builder.Services.AddSingleton(context => new AuthenticationServiceOptions { UseRegexRulesForPasswordStrengthCheck = useRegexRulesForPasswordStrengthCheck });
             builder.Services.TryAddScoped<AuthenticationService>();
 
             builder.AddRestApi();

@@ -213,17 +213,7 @@ namespace Rhetos.AspNetFormsAuth
 
         public Task SetUserNameAsync(IdentityUser<Guid> user, string userName, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
-
-            if (userName == null)
-                throw new ArgumentNullException(nameof(userName));
-
-            user.UserName = userName;
-
-            return Task.CompletedTask;
+            throw new NotSupportedException($"Changing the username is only supported through the Common.DomRepository class.");
         }
 
         public Task SetPasswordHashAsync(IdentityUser<Guid> user, string passwordHash, CancellationToken cancellationToken)
@@ -310,7 +300,7 @@ namespace Rhetos.AspNetFormsAuth
 
         public Task SetLockoutEnabledAsync(IdentityUser<Guid> user, bool enabled, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException($"Setting the ${nameof(IdentityUser<Guid>.LockoutEnabled)} property is not allowed.");
+            throw new NotSupportedException($"Setting the ${nameof(IdentityUser<Guid>.LockoutEnabled)} property is not supported in this implementation of the user store.");
         }
     }
 }

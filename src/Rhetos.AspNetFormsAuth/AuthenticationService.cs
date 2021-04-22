@@ -53,8 +53,7 @@ namespace Rhetos.AspNetFormsAuth
             IRhetosComponent<Lazy<IEnumerable<ISendPasswordResetToken>>> sendPasswordResetTokenPlugins,
             IRhetosComponent<ILocalizer> localizer,
             SignInManager<IdentityUser<Guid>> signInManager,
-            UserManager<IdentityUser<Guid>> userManager,
-            AuthenticationServiceOptions authenticationServiceOptions)
+            UserManager<IdentityUser<Guid>> userManager)
         {
             _logger = logProvider.Value.GetLogger("AspNetFormsAuth.AuthenticationService");
             _authorizationManager = authorizationManager.Value;
@@ -63,12 +62,7 @@ namespace Rhetos.AspNetFormsAuth
             _signInManager = signInManager;
             _userManager = userManager;
 
-            _passwordStrengthRules = new Lazy<IEnumerable<IPasswordStrength>>(() => {
-                if (authenticationServiceOptions.UseRegexRulesForPasswordStrengthCheck)
-                    return repositories.Value.Load<IPasswordStrength>();
-                else
-                    return new List<IPasswordStrength>();
-            });
+            _passwordStrengthRules = new Lazy<IEnumerable<IPasswordStrength>>(() => repositories.Value.Load<IPasswordStrength>());
 
             _localizer = localizer.Value;
         }

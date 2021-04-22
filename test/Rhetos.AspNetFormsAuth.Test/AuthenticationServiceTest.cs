@@ -198,6 +198,35 @@ namespace Rhetos.AspNetFormsAuth.Test
             }
         }
 
+        [TestMethod]
+        public async Task OverrideDeafultConfigurationTest()
+        {
+            var factoryWithCustomConfiguration = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.AddIdentityCore<IdentityUser<Guid>>(options =>
+                    {
+                        options.Password.RequiredLength = 10;
+                    });
+                });
+            });
+
+            using (var serviceScope = factoryWithCustomConfiguration.Server.Services.CreateScope())
+            {
+                var repository = serviceScope.ServiceProvider.GetService<IRhetosComponent<Common.DomRepository>>().Value;
+                var authenticationService = serviceScope.ServiceProvider.GetService<AuthenticationService>();
+                var userManager = serviceScope.ServiceProvider.GetService<UserManager<IdentityUser<Guid>>>();
+                var userName = "Test";
+                repository.Common.Principal.Insert(new Common.Principal { Name = userName });
+
+                var password = "12345";
+                var user = await userManager.FindByNameAsync(userName);
+                var addPasswordResult = await userManager.AddPasswordAsync(user, password);
+                Assert.IsTrue(addPasswordResult.Errors.Any(x => x.Code == "PasswordTooShort"), "Adding password should fail because it is configured to be at least 10 characters long.");
+            }
+        }
+
         [ClassCleanup]
         public static void ClassCleanup()
         {

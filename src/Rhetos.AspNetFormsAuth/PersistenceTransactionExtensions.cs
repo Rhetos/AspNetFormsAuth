@@ -57,7 +57,7 @@ namespace Rhetos.AspNetFormsAuth
             });
         }
 
-        private static T PrepareCommand<T>(IPersistenceTransaction persistenceTransaction, string query, object[] parameters, Func<DbCommand, T> something)
+        private static T PrepareCommand<T>(IPersistenceTransaction persistenceTransaction, string query, object[] parameters, Func<DbCommand, T> executeCommand)
         {
             using (var command = persistenceTransaction.Connection.CreateCommand())
             {
@@ -65,7 +65,7 @@ namespace Rhetos.AspNetFormsAuth
                 command.CommandText = query;
                 AddParameters(command, parameters);
 
-                return something(command);
+                return executeCommand(command);
             }
         }
 
