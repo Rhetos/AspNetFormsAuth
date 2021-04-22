@@ -94,11 +94,13 @@ namespace Rhetos.AspNetFormsAuth
                 }
                 else
                 {
+                    //In the previous version of the plugin the field IsConfirmed was not used and it was always set to true
                     await persistenceTransaction.Value.ExecuteNonQueryAsync(@"
-                        INSERT INTO dbo.webpages_Membership (UserId, PasswordFailuresSinceLastSuccess, Password, PasswordSalt, LockoutEnd) VALUES(@0, @1, @2, @3,@4)",
+                        INSERT INTO dbo.webpages_Membership (UserId, PasswordFailuresSinceLastSuccess, Password, PasswordSalt, LockoutEnd, IsConfirmed) VALUES(@0, @1, @2, @3,@4, @5)",
                         principal.AspNetUserId.Value, user.AccessFailedCount,
                         user.PasswordHash ?? string.Empty, string.Empty,
-                        user.LockoutEnd == null ? null : user.LockoutEnd.Value.DateTime);
+                        user.LockoutEnd == null ? null : user.LockoutEnd.Value.DateTime,
+                        true);
                 }
 
                 return IdentityResult.Success;

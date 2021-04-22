@@ -13,6 +13,8 @@
     <tags>Rhetos plugin</tags>
     <dependencies>
       <dependency id="Rhetos.CommonConcepts" version="5.0.0-dev" />
+      <dependency id="Rhetos.RestGenerator" version="5.0.0-dev" />
+      <dependency id="Rhetos.Host.AspNet" version="5.0.0-dev" />
     </dependencies>
     <frameworkReferences>
       <group targetFramework="net5.0">

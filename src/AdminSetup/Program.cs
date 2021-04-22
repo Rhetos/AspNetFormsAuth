@@ -130,7 +130,7 @@ namespace AdminSetup
 
             var principalCount = persistenceTransaction.Value.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Common.Principal WHERE Name = @0", new object[] { adminUserName }).Result;
             if (principalCount == 0)
-                throw new ApplicationException($"Missing '{adminUserName}' user entry in Common.Principal entity. Please execute DeployPackages.exe, with AspNetFormsAuth package included, to initialize the 'admin' user entry.");
+                throw new ApplicationException($"Missing '{adminUserName}' user entry in Common.Principal entity. Please execute the 'rhetos dbupdate' command, with AspNetFormsAuth package included, to initialize the 'admin' user entry.");
 
             var user = userManager.FindByNameAsync(adminUserName).Result;
 
