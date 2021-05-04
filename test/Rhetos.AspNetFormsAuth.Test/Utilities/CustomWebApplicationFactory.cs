@@ -20,6 +20,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Rhetos.AspNetFormsAuth.Test
 {
@@ -33,7 +34,7 @@ namespace Rhetos.AspNetFormsAuth.Test
             );
         }
 
-        private void ConfigureRhetos(IRhetosHostBuilder rhetosHostBuilder)
+        private void ConfigureRhetos(IServiceProvider serviceProvider, IRhetosHostBuilder rhetosHostBuilder)
         {
             rhetosHostBuilder.UseRootFolder(@"..\..\..\..\Rhetos.AspNetFormsAuth.TestApp\bin\Debug\net5.0");
         }

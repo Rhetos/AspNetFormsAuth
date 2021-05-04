@@ -101,7 +101,7 @@ namespace AdminSetup
 
         private int ExecuteCommand(string rhetosHostAssemblyPath, string password)
         {
-            var host = GetHostBuilder(rhetosHostAssemblyPath)
+            var host = HostResolver.FindBuilder(rhetosHostAssemblyPath)
                 .ConfigureServices(serviceCollection => serviceCollection.AddScoped<IUserInfo, ProcessUserInfo>())
                 .Build();
             using (var scope = host.Services.CreateScope())
@@ -149,27 +149,6 @@ namespace AdminSetup
             var newArgs = new List<string>(baseArgs);
             newArgs.Add(ExecuteCommandInCurrentProcessOptionName);
             return Exe.RunWithHostConfiguration(GetType().Assembly.Location, rhetosHostDllPath, newArgs, logger);
-        }
-
-        private static IHostBuilder GetHostBuilder(string rhetosHostAssemblyPath)
-        {
-            var HostBuilderFactoryMethodName = "CreateHostBuilder";
-            var startupAssembly = Assembly.LoadFrom(rhetosHostAssemblyPath);
-
-            var entryPointType = startupAssembly?.EntryPoint?.DeclaringType;
-            if (entryPointType == null)
-                throw new FrameworkException($"Startup assembly '{startupAssembly.Location}' doesn't have an entry point.");
-
-            var method = entryPointType.GetMethod(HostBuilderFactoryMethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
-            if (method == null)
-                throw new FrameworkException(
-                    $"Static method '{entryPointType.FullName}.{HostBuilderFactoryMethodName}' not found in entry point type in assembly {startupAssembly.Location}."
-                    + $" Method is required in entry point assembly for constructing a configured instance of {nameof(IHost)}.");
-
-            if (method.ReturnType != typeof(IHostBuilder))
-                throw new FrameworkException($"Static method '{entryPointType.FullName}.{HostBuilderFactoryMethodName}' has incorrect return type. Expected return type is {nameof(IHostBuilder)}.");
-
-            return (IHostBuilder)method.InvokeEx(null, new object[] { new string[0] });
         }
 
         private static void CheckElevatedPrivileges()

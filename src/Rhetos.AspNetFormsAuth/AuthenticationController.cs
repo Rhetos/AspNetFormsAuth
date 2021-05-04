@@ -94,13 +94,13 @@ namespace Rhetos.AspNetFormsAuth
         public async Task<bool> Login([FromBody] LoginParameters parameters)
         {
             ValidateForEmptyParameters(parameters);
-            return await _authenticationService.LogIn(parameters.UserName, parameters.Password, parameters.PersistCookie);
+            return await _authenticationService.LogInAsync(parameters.UserName, parameters.Password, parameters.PersistCookie);
         }
 
         [HttpPost]
         public async Task Logout()
         {
-            await _authenticationService.LogOut();
+            await _authenticationService.LogOutAsync();
         }
 
         [HttpPost]
@@ -108,7 +108,7 @@ namespace Rhetos.AspNetFormsAuth
         public async Task SetPassword([FromBody] SetPasswordParameters parameters)
         {
             ValidateForEmptyParameters(parameters);
-            await _authenticationService.SetPassword(parameters.UserName, parameters.Password, parameters.IgnorePasswordStrengthPolicy);
+            await _authenticationService.SetPasswordAsync(parameters.UserName, parameters.Password, parameters.IgnorePasswordStrengthPolicy);
         }
 
         [HttpPost]
@@ -116,7 +116,7 @@ namespace Rhetos.AspNetFormsAuth
         public async Task<bool> ChangeMyPassword([FromBody] ChangeMyPasswordParameters parameters)
         {
             ValidateForEmptyParameters(parameters);
-            return await _authenticationService.ChangeMyPassword(HttpContext?.User?.Identity?.Name, parameters.OldPassword, parameters.NewPassword);
+            return await _authenticationService.ChangeMyPasswordAsync(HttpContext?.User?.Identity?.Name, parameters.OldPassword, parameters.NewPassword);
         }
 
         [HttpPost]
@@ -124,21 +124,21 @@ namespace Rhetos.AspNetFormsAuth
         public async Task UnlockUser([FromBody] UnlockUserParameters parameters)
         {
             ValidateForEmptyParameters(parameters);
-            await _authenticationService.UnlockUser(parameters.UserName);
+            await _authenticationService.UnlockUserAsync(parameters.UserName);
         }
 
         [HttpPost]
         public async Task<string> GeneratePasswordResetToken([FromBody] GeneratePasswordResetTokenParameters parameters)
         {
             ValidateForEmptyParameters(parameters);
-            return await _authenticationService.GeneratePasswordResetToken(parameters.UserName);
+            return await _authenticationService.GeneratePasswordResetTokenAsync(parameters.UserName);
         }
 
         [HttpPost]
         public async Task SendPasswordResetToken([FromBody] SendPasswordResetTokenParameters parameters)
         {
             ValidateForEmptyParameters(parameters);
-            await _authenticationService.SendPasswordResetToken(parameters.UserName, parameters.AdditionalClientInfo);
+            await _authenticationService.SendPasswordResetTokenAsync(parameters.UserName, parameters.AdditionalClientInfo);
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Rhetos.AspNetFormsAuth
         public async Task<bool> ResetPassword([FromBody] ResetPasswordParameters parameters)
         {
             ValidateForEmptyParameters(parameters);
-            return await _authenticationService.ResetPassword(parameters.UserName, parameters.NewPassword, parameters.PasswordResetToken);
+            return await _authenticationService.ResetPasswordAsync(parameters.UserName, parameters.NewPassword, parameters.PasswordResetToken);
         }
 
         private void ValidateForEmptyParameters(object parameters)

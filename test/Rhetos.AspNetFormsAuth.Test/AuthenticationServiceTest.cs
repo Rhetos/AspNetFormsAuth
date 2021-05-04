@@ -187,7 +187,7 @@ namespace Rhetos.AspNetFormsAuth.Test
                 Exception exception = null;
                 try
                 {
-                    await authenticationService.ChangeMyPassword(user.UserName, user.Password, "test");
+                    await authenticationService.ChangeMyPasswordAsync(user.UserName, user.Password, "test");
                 }
                 catch (Exception e)
                 {

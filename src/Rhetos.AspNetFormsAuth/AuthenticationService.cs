@@ -89,7 +89,7 @@ namespace Rhetos.AspNetFormsAuth
                     null, null);
         }
 
-        public async Task<bool> LogIn(string userName, string password, bool rememberMe)
+        public async Task<bool> LogInAsync(string userName, string password, bool rememberMe)
         {
             _logger.Trace(() => $"Login: {userName}");
 
@@ -97,7 +97,7 @@ namespace Rhetos.AspNetFormsAuth
             ValidateNonEmptyString(password, nameof(password));
 
             var logInSucceeded = false;
-            await SafeExecute(
+            await SafeExecuteAsync(
                 async () =>
                 {
                     var loginResult = await _signInManager.PasswordSignInAsync(userName, password, rememberMe, lockoutOnFailure: true);
@@ -106,17 +106,17 @@ namespace Rhetos.AspNetFormsAuth
             return logInSucceeded;
         }
 
-        public async Task LogOut()
+        public async Task LogOutAsync()
         {
             _logger.Trace(() => $"LogOut");
 
-            await SafeExecute(
+            await SafeExecuteAsync(
                 async () => await _signInManager.SignOutAsync(),
                 "Logout", "");
             ;
         }
 
-        public async Task SetPassword(string userName, string password, bool ignorePasswordStrengthPolicy)
+        public async Task SetPasswordAsync(string userName, string password, bool ignorePasswordStrengthPolicy)
         {
             _logger.Trace(() => "SetPassword: " + password);
 
@@ -130,7 +130,7 @@ namespace Rhetos.AspNetFormsAuth
             else
                 CheckPasswordStrength(password);
 
-            await SafeExecute(
+            await SafeExecuteAsync(
                 async () => {
                     var user = await _userManager.FindByNameAsync(userName);
                     var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -138,7 +138,7 @@ namespace Rhetos.AspNetFormsAuth
                 }, "Set password", userName);
         }
 
-        public async Task<bool> ChangeMyPassword(string userName, string oldPassword, string newPassword)
+        public async Task<bool> ChangeMyPasswordAsync(string userName, string oldPassword, string newPassword)
         {
             _logger.Trace(() => "ChangeMyPassword");
 
@@ -148,7 +148,7 @@ namespace Rhetos.AspNetFormsAuth
 
             CheckPasswordStrength(newPassword);
 
-            return await SafeExecute(
+            return await SafeExecuteAsync(
                 async () => {
                     var user = await _userManager.FindByNameAsync(userName);
                     return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
@@ -168,13 +168,13 @@ namespace Rhetos.AspNetFormsAuth
             }
         }
 
-        public async Task UnlockUser(string userName)
+        public async Task UnlockUserAsync(string userName)
         {
             _logger.Trace(() => "UnlockUser: " + userName);
             ValidateNonEmptyString(userName, nameof(userName));
             CheckPermissions(AuthenticationServiceClaims.UnlockUserClaim, userName);
 
-            await SafeExecute(
+            await SafeExecuteAsync(
                 async () =>
                 {
                     var user = await _userManager.FindByNameAsync(userName);
@@ -182,15 +182,15 @@ namespace Rhetos.AspNetFormsAuth
                 }, "Unlock user", userName);
         }
 
-        public async Task<string> GeneratePasswordResetToken(string userName)
+        public async Task<string> GeneratePasswordResetTokenAsync(string userName)
         {
             _logger.Trace(() => "GeneratePasswordResetToken: " + userName);
             CheckPermissions(AuthenticationServiceClaims.GeneratePasswordResetTokenClaim, userName);
             ValidateNonEmptyString(userName, nameof(userName));
-            return await GeneratePasswordResetTokenInternal(userName);
+            return await GeneratePasswordResetTokenInternalAsync(userName);
         }
 
-        private async Task<string> GeneratePasswordResetTokenInternal(string userName)
+        private async Task<string> GeneratePasswordResetTokenInternalAsync(string userName)
         {
             if (!DoesUserExists(userName)) // Providing this information is not a security issue, because this method requires admin credentials (GeneratePasswordResetTokenClaim).
                 throw new UserException("User '{0}' is not registered.", new[] { userName }, null, null);
@@ -199,7 +199,7 @@ namespace Rhetos.AspNetFormsAuth
             return await _userManager.GeneratePasswordResetTokenAsync(user);
         }
 
-        public async Task SendPasswordResetToken(string userName, Dictionary<string, string> additionalClientInfo)
+        public async Task SendPasswordResetTokenAsync(string userName, Dictionary<string, string> additionalClientInfo)
         {
             _logger.Trace("SendPasswordResetToken " + userName);
             ValidateNonEmptyString(userName, nameof(userName));
@@ -223,7 +223,7 @@ namespace Rhetos.AspNetFormsAuth
             }
         }
 
-        public async Task<bool> ResetPassword(string userName,string newPassword, string resetPasswordToken)
+        public async Task<bool> ResetPasswordAsync(string userName,string newPassword, string resetPasswordToken)
         {
             _logger.Trace("ResetPassword");
 
@@ -234,7 +234,7 @@ namespace Rhetos.AspNetFormsAuth
             CheckPasswordStrength(newPassword);
 
             IdentityUser<Guid> user = null;
-            bool successfulReset = await SafeExecute(
+            bool successfulReset = await SafeExecuteAsync(
                 async () =>
                 {
                     user = await _userManager.FindByNameAsync(userName);
@@ -242,7 +242,7 @@ namespace Rhetos.AspNetFormsAuth
                 }, "ResetPassword", userName);
 
             if (successfulReset && user != null)
-                await SafeExecute( // Login does not need to be successful for this function to return true.
+                await SafeExecuteAsync( // Login does not need to be successful for this function to return true.
                     async () => { await _signInManager.SignInAsync(user, false); },
                     "Login after ResetPassword", userName);
 
@@ -288,10 +288,10 @@ namespace Rhetos.AspNetFormsAuth
         /// It logs the exception to the Info log.
         /// If the <see cref="IdentityResult.Succeeded"/> is fase it logs the <see cref="IdentityResult.Errors"/> to the Trace log.
         /// </summary>
-        async Task<bool> SafeExecute(Func<Task<IdentityResult>> action, string actionName, string context)
+        async Task<bool> SafeExecuteAsync(Func<Task<IdentityResult>> action, string actionName, string context)
         {
             IdentityResult identityResult = IdentityResult.Failed();
-            var executionSuccesfullyCompleted = await SafeExecute(
+            var executionSuccesfullyCompleted = await SafeExecuteAsync(
                 async () =>
                 {
                     identityResult = await action();
@@ -307,7 +307,7 @@ namespace Rhetos.AspNetFormsAuth
         /// Otherwise it returns false.
         /// It logs the exception to the Info log.
         /// </summary>
-        async Task<bool> SafeExecute(Func<Task> action, string actionName, string context)
+        async Task<bool> SafeExecuteAsync(Func<Task> action, string actionName, string context)
         {
             try
             {

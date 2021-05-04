@@ -17,15 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Rhetos.Host.Net.Logging;
-using System.Threading.Tasks;
+using System;
 
 namespace Rhetos.AspNetFormsAuth.TestApp
 {
@@ -46,8 +44,9 @@ namespace Rhetos.AspNetFormsAuth.TestApp
                 .AddJsonOptions(o => o.JsonSerializerOptions.PropertyNamingPolicy = null);
 
             // Adding Rhetos to AspNetCore application
-            services.AddRhetos(rhetosHostBuilder => ConfigureRhetosHostBuilder(rhetosHostBuilder, Configuration))
-                .AddAspNetFormsAuth();
+            services.AddRhetos(ConfigureRhetosHostBuilder)
+                .AddAspNetFormsAuth()
+                .AddControllers();
             // Done adding Rhetos
 
             services.AddSwaggerGen(c =>
@@ -81,13 +80,13 @@ namespace Rhetos.AspNetFormsAuth.TestApp
             });
         }
 
-        public static void ConfigureRhetosHostBuilder(IRhetosHostBuilder rhetosHostBuilder, IConfiguration configuration)
+        private void ConfigureRhetosHostBuilder(IServiceProvider serviceProvider, IRhetosHostBuilder rhetosHostBuilder)
         {
             rhetosHostBuilder
                 .ConfigureRhetosHostDefaults()
                 .UseBuilderLogProvider(new RhetosBuilderDefaultLogProvider()) // delegate RhetosHost logging to several NetCore targets
                 .ConfigureConfiguration(cfg => {
-                    cfg.MapNetCoreConfiguration(configuration);
+                    cfg.MapNetCoreConfiguration(Configuration);
                     cfg.AddJsonFile("rhetos-app.local.settings.json");
                 });
         }

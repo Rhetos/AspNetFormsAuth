@@ -19,14 +19,11 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Rhetos;
 using Rhetos.AspNetFormsAuth;
 using Rhetos.Host.AspNet;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -35,11 +32,10 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         /// <summary>
         /// Setup the required components for the <see cref="AuthenticationService"/>.
-        /// Adds the <see cref="AuthenticationController"/> to the controller feature.
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static RhetosAspNetServiceCollectionBuilder AddAspNetFormsAuth(this RhetosAspNetServiceCollectionBuilder builder)
+        public static RhetosAspNetFormsAuthServiceCollectionBuilder AddAspNetFormsAuth(this RhetosServiceCollectionBuilder builder)
         {
             builder.Services.AddIdentityCore<IdentityUser<Guid>>(options =>
                 {
@@ -68,22 +64,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     return Task.CompletedTask;
                 });
 
-            builder.Services
-                .AddControllers()
-                .ConfigureApplicationPartManager(p =>
-                {
-                    p.FeatureProviders.Add(new AspNetFormsControllerFeatureProvider());
-                });
-
-            return builder;
-        }
-    }
-
-    internal class AspNetFormsControllerFeatureProvider : IApplicationFeatureProvider<ControllerFeature>
-    {
-        public void PopulateFeature(IEnumerable<ApplicationPart> parts, ControllerFeature feature)
-        {
-            feature.Controllers.Add(typeof(AuthenticationController).GetTypeInfo());
+            return new RhetosAspNetFormsAuthServiceCollectionBuilder(builder.Services);
         }
     }
 }

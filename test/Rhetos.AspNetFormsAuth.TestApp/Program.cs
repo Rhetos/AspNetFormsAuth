@@ -18,10 +18,7 @@
 */
 
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Rhetos.AspNetFormsAuth.TestApp
 {
@@ -38,22 +35,5 @@ namespace Rhetos.AspNetFormsAuth.TestApp
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-
-        // This method exposes IRhetosHostBuilder for purposes of tooling using same configuration values
-        // and same RhetosHostBuilder configuration delegate as the app itself
-        public static IRhetosHostBuilder CreateRhetosHostBuilder()
-        {
-            // create Host for this web app
-            var host = CreateHostBuilder(null).Build();
-
-            // extract configuration of the web app
-            var configuration = host.Services.GetRequiredService<IConfiguration>();
-
-            // Create RhetosHostBuilder and configure it
-            var rhetosHostBuilder = new RhetosHostBuilder();
-            Startup.ConfigureRhetosHostBuilder(rhetosHostBuilder, configuration);
-
-            return rhetosHostBuilder;
-        }
     }
 }
