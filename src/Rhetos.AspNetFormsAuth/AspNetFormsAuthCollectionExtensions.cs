@@ -55,8 +55,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             builder.AddRestApi();
 
-            builder.UseAspNetCoreIdentityUser();
-
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
                 .AddCookie(IdentityConstants.ApplicationScheme, o => o.Events.OnRedirectToLogin = context =>
                 {
