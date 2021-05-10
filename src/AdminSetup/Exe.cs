@@ -75,7 +75,7 @@ namespace AdminSetup
             ProcessStartInfo start = new ProcessStartInfo(executable)
             {
                 Arguments = arguments,
-                UseShellExecute = false
+                UseShellExecute = false,
             };
 
             int processErrorCode;

@@ -83,7 +83,7 @@ namespace Rhetos.AspNetFormsAuth.TestApp
         private void ConfigureRhetosHostBuilder(IServiceProvider serviceProvider, IRhetosHostBuilder rhetosHostBuilder)
         {
             rhetosHostBuilder
-                .ConfigureRhetosHostDefaults()
+                .ConfigureRhetosAppDefaults()
                 .UseBuilderLogProvider(new RhetosBuilderDefaultLogProvider()) // delegate RhetosHost logging to several NetCore targets
                 .ConfigureConfiguration(cfg => {
                     cfg.MapNetCoreConfiguration(Configuration);

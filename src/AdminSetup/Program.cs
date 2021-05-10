@@ -28,14 +28,14 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
-using Rhetos.Host.AspNet;
 using Rhetos.Persistence;
-using System.Reflection;
 using Rhetos.Security;
 using System.Linq;
 using System.Text;
 using System.Security.Principal;
 using System.Runtime.InteropServices;
+using Rhetos.Logging;
+using Autofac;
 
 namespace AdminSetup
 {
@@ -43,34 +43,9 @@ namespace AdminSetup
     {
         static int Main(string[] args)
         {
-            string errorMessage;
-            try
-            {
-                new App().Run(args);
-                return 0;
-            }
-            catch (ApplicationException ex)
-            {
-                errorMessage = "CANCELED: " + ex.Message;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = "ERROR: " + ex;
-            }
-
-            if (errorMessage != null)
-            {
-                Console.WriteLine();
-                Console.WriteLine(errorMessage);
-
-                Console.WriteLine();
-                Console.Write("Press any key to continue . . .");
-                Console.ReadKey(true);
-
-                return 1;
-            }
-
-            return 0;
+            var results =  new App().Run(args);
+            Console.ReadKey(true);
+            return results;
         }
     }
 
@@ -78,7 +53,14 @@ namespace AdminSetup
     {
         static readonly string ExecuteCommandInCurrentProcessOptionName = "--execute-command-in-current-process";
 
-        internal void Run(string[] args)
+        private readonly ILogger _logger;
+
+        public App()
+        {
+            _logger = new ConsoleLogger(EventType.Trace, "AdminSetup");
+        }
+
+        internal int Run(string[] args)
         {
             var rootCommand = new RootCommand();
             rootCommand.Add(new Argument<FileInfo>("startup-assembly") { Description = "Startup assembly of the host application." });
@@ -91,18 +73,27 @@ namespace AdminSetup
             rootCommand.Handler =
                 CommandHandler.Create((FileInfo startupAssembly, string password, bool executeCommandInCurrentProcess) => {
                     if (executeCommandInCurrentProcess)
-                        return ExecuteCommand(startupAssembly.FullName, password);
+                        return SafeExecuteCommand(() => ExecuteCommand(startupAssembly.FullName, password));
                     else
                         return InvokeAsExternalProcess(startupAssembly.FullName, args);
                 });
 
-            rootCommand.Invoke(args);
+            return rootCommand.Invoke(args);
         }
 
         private int ExecuteCommand(string rhetosHostAssemblyPath, string password)
         {
             var host = HostResolver.FindBuilder(rhetosHostAssemblyPath)
-                .ConfigureServices(serviceCollection => serviceCollection.AddScoped<IUserInfo, ProcessUserInfo>())
+                .ConfigureServices(serviceCollection => {
+                    serviceCollection.Configure<RhetosHostBuilderOptions>(o =>
+                    {
+                        o.ConfigureActions.Add((serviceProvider, rhetosHostBuilder) =>
+                        {
+                            rhetosHostBuilder.ConfigureContainer(builder => builder.RegisterType<ConsoleLogProvider>().As<ILogProvider>().SingleInstance());
+                        });
+                    });
+                    serviceCollection.AddScoped<IUserInfo, ProcessUserInfo>();
+                })
                 .Build();
             using (var scope = host.Services.CreateScope())
             {
@@ -140,18 +131,17 @@ namespace AdminSetup
             if (!changedPasswordResults.Succeeded)
                 throw new ApplicationException($"Cannot change password. ResetPassword failed with errors: {string.Join(Environment.NewLine, changedPasswordResults.Errors.Select(x => x.Description))}.");
 
-            Console.WriteLine("Password successfully changed.");
+            _logger.Info("Password successfully changed.");
         }
 
         private int InvokeAsExternalProcess(string rhetosHostDllPath, string[] baseArgs)
         {
-            var logger = new ConsoleLogProvider().GetLogger("AdminSetup");
             var newArgs = new List<string>(baseArgs);
             newArgs.Add(ExecuteCommandInCurrentProcessOptionName);
-            return Exe.RunWithHostConfiguration(GetType().Assembly.Location, rhetosHostDllPath, newArgs, logger);
+            return Exe.RunWithHostConfiguration(GetType().Assembly.Location, rhetosHostDllPath, newArgs, _logger);
         }
 
-        private static void CheckElevatedPrivileges()
+        private void CheckElevatedPrivileges()
         {
             //Checking for admin privileges is only supported on Windows
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -164,7 +154,7 @@ namespace AdminSetup
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.GetType() + ": " + ex.Message);
+                    _logger.Error(ex.GetType() + ": " + ex.Message);
                     elevated = false;
                 }
 
@@ -221,6 +211,28 @@ namespace AdminSetup
                 Console.ForegroundColor = oldFg;
                 Console.BackgroundColor = oldBg;
             }
+        }
+
+        private int SafeExecuteCommand(Action action)
+        {
+            string errorMessage;
+            try
+            {
+                action.Invoke();
+            }
+            catch (ApplicationException ex)
+            {
+                errorMessage = "CANCELED: " + ex.Message;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "ERROR: " + ex;
+                _logger.Error(errorMessage);
+
+                return 1;
+            }
+
+            return 0;
         }
     }
 }
