@@ -44,7 +44,8 @@ namespace Rhetos.AspNetFormsAuth.TestApp
                 .AddJsonOptions(o => o.JsonSerializerOptions.PropertyNamingPolicy = null);
 
             // Adding Rhetos to AspNetCore application
-            services.AddRhetos(ConfigureRhetosHostBuilder)
+            services.AddRhetosHost(ConfigureRhetosHostBuilder)
+                .AddAspNetCoreIdentityUser()
                 .AddAspNetFormsAuth()
                 .AddControllers();
             // Done adding Rhetos

@@ -30,7 +30,7 @@ namespace Rhetos.AspNetFormsAuth.Test
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureServices(services =>
-                services.AddRhetos(ConfigureRhetos)
+                services.AddRhetosHost(ConfigureRhetos)
             );
         }
 
