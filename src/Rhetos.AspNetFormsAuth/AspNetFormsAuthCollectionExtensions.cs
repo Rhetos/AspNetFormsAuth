@@ -20,9 +20,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Rhetos;
 using Rhetos.AspNetFormsAuth;
-using Rhetos.Host.AspNet;
 using System;
 using System.Threading.Tasks;
 
@@ -53,7 +51,7 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.TryAddScoped<ISecurityStampValidator, SecurityStampValidator<IdentityUser<Guid>>>();
             builder.Services.TryAddScoped<AuthenticationService>();
 
-            builder.AddRestApi();
+            builder.AddRestApiFilters();
 
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
                 .AddCookie(IdentityConstants.ApplicationScheme, o => o.Events.OnRedirectToLogin = context =>

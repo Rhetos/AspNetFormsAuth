@@ -73,8 +73,6 @@ namespace Rhetos.AspNetFormsAuth.TestApp
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseRhetosRestApi();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
