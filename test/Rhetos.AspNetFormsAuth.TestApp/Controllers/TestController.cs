@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 namespace Rhetos.AspNetFormsAuth.TestApp.Controllers
 {
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class TestController : ControllerBase
     {
         [HttpGet]

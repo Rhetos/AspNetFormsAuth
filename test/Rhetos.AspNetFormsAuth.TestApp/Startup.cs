@@ -22,7 +22,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Rhetos.Host.Net.Logging;
 using System;
 
 namespace Rhetos.AspNetFormsAuth.TestApp
@@ -46,13 +45,13 @@ namespace Rhetos.AspNetFormsAuth.TestApp
             // Adding Rhetos to AspNetCore application
             services.AddRhetosHost(ConfigureRhetosHostBuilder)
                 .AddAspNetCoreIdentityUser()
-                .AddAspNetFormsAuth()
-                .AddControllers();
+                .AddAspNetFormsAuth();
             // Done adding Rhetos
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rhetos.AspNetFormsAuth.TestApp", Version = "v1" });
+                c.SwaggerDoc("rhetos", new OpenApiInfo { Title = "Rhetos REST API", Version = "v1" });
             });
         }
 
@@ -66,11 +65,15 @@ namespace Rhetos.AspNetFormsAuth.TestApp
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Rhetos.AspNetFormsAuth.TestApp v1");
+                c.SwaggerEndpoint("/swagger/rhetos/swagger.json", "Rhetos REST API");
             });
 
             app.UseRouting();
 
+            app.UseRhetosAspNetFormsAuth();
+
             app.UseAuthentication();
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -83,7 +86,7 @@ namespace Rhetos.AspNetFormsAuth.TestApp
         {
             rhetosHostBuilder
                 .ConfigureRhetosAppDefaults()
-                .UseBuilderLogProvider(new RhetosBuilderDefaultLogProvider()) // delegate RhetosHost logging to several NetCore targets
+                .UseBuilderLogProviderFromHost(serviceProvider)
                 .ConfigureConfiguration(cfg => {
                     cfg.MapNetCoreConfiguration(Configuration);
                     cfg.AddJsonFile("rhetos-app.local.settings.json");

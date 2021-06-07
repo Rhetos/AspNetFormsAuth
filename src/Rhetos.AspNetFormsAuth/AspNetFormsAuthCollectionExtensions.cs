@@ -33,8 +33,14 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static RhetosAspNetFormsAuthServiceCollectionBuilder AddAspNetFormsAuth(this RhetosServiceCollectionBuilder builder)
+        public static RhetosServiceCollectionBuilder AddAspNetFormsAuth(this RhetosServiceCollectionBuilder builder, Action<AspNetFormsAuthOptions> configureOptions = null)
         {
+            builder.Services.AddOptions();
+            if (configureOptions != null)
+            {
+                builder.Services.Configure(configureOptions);
+            }
+
             builder.Services.AddIdentityCore<IdentityUser<Guid>>(options =>
                 {
                     options.Password.RequireDigit = false;
@@ -60,7 +66,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     return Task.CompletedTask;
                 });
 
-            return new RhetosAspNetFormsAuthServiceCollectionBuilder(builder.Services);
+            return builder;
         }
     }
 }

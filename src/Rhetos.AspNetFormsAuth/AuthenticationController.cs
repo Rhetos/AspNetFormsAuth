@@ -77,10 +77,8 @@ namespace Rhetos.AspNetFormsAuth
         public string NewPassword { get; set; }
     }
 
-    [Route("Resources/AspNetFormsAuth/Authentication/[action]")]
     [ServiceFilter(typeof(ApiExceptionFilter))]
     [ServiceFilter(typeof(ApiCommitOnSuccessFilter))]
-    [NonController]
     public class AuthenticationController : ControllerBase
     {
         private readonly AuthenticationService _authenticationService;

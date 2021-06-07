@@ -17,20 +17,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Autofac;
-using System.ComponentModel.Composition;
-
 namespace Rhetos.AspNetFormsAuth
 {
-    [Export(typeof(Module))]
-    public class AutofacModuleConfiguration : Module
+    public class AspNetFormsAuthOptions
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.RegisterType<AdminUserInitializer>();
-            builder.GetRhetosPluginRegistration().FindAndRegisterPlugins<ISendPasswordResetToken>();
+        /// <summary>
+        /// The default value is backward compatible with older versions of Impersonation plugin.
+        /// </summary>
+        public string BaseRoute { get; set; } = "Resources/AspNetFormsAuth/Authentication";
 
-            base.Load(builder);
-        }
+        public string ApiExplorerGroupName { get; set; } = "rhetos";
     }
 }
