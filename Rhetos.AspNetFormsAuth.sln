@@ -11,6 +11,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.Test", "test\Rhetos.AspNetFormsAuth.Test\Rhetos.AspNetFormsAuth.Test.csproj", "{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{55A14E81-C74F-4A30-B60E-D401D3D4D3B4}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		Build.bat = Build.bat
+		ChangeLog.md = ChangeLog.md
+		Directory.Build.props = Directory.Build.props
+		Readme.md = Readme.md
+		Rhetos.AspNetFormsAuth.nuspec = Rhetos.AspNetFormsAuth.nuspec
+		Test.bat = Test.bat
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

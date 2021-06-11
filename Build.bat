@@ -27,6 +27,7 @@ PowerShell -ExecutionPolicy ByPass .\Tools\Build\ChangeVersion.ps1 %Version% dev
 @EXIT /B 0
 
 :Error0
+@PowerShell -ExecutionPolicy ByPass .\Tools\Build\ChangeVersion.ps1 %Version% dev >nul
 @ECHO.
 @ECHO %~nx0 FAILED.
 @IF /I [%1] NEQ [/NOPAUSE] @PAUSE
