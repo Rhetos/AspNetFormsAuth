@@ -43,9 +43,19 @@ namespace AdminSetup
     {
         static int Main(string[] args)
         {
-            var results =  new App().Run(args);
-            Console.ReadKey(true);
-            return results;
+            try
+            {
+                return new App().Run(args);
+            }
+            finally
+            {
+                if (!args.Any(arg => arg.Equals("--no-pause")))
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Press any key to continue . . .");
+                    Console.ReadKey(true);
+                }
+            }
         }
     }
 
@@ -65,13 +75,13 @@ namespace AdminSetup
             var rootCommand = new RootCommand();
             rootCommand.Add(new Argument<FileInfo>("startup-assembly") { Description = "Startup assembly of the host application." });
             rootCommand.Add(new Option<string>("--password", "Administrator password."));
+            rootCommand.Add(new Option<bool>("--no-pause", "Don't wait for user input after execution."));
             //Lack of this switch means that the dbupdate command should start the command rhetos.exe dbupdate
             //in another process with the host applications runtimeconfig.json and deps.json files
-            var executeCommandInCurrentProcessOption = new Option<bool>(ExecuteCommandInCurrentProcessOptionName);
-            executeCommandInCurrentProcessOption.IsHidden = true;
-            rootCommand.Add(executeCommandInCurrentProcessOption);
+            rootCommand.Add(new Option<bool>(ExecuteCommandInCurrentProcessOptionName) { IsHidden = true });
             rootCommand.Handler =
-                CommandHandler.Create((FileInfo startupAssembly, string password, bool executeCommandInCurrentProcess) => {
+                CommandHandler.Create((FileInfo startupAssembly, string password, bool executeCommandInCurrentProcess) =>
+                {
                     if (executeCommandInCurrentProcess)
                         return SafeExecuteCommand(() => ExecuteCommand(startupAssembly.FullName, password));
                     else
@@ -81,7 +91,7 @@ namespace AdminSetup
             return rootCommand.Invoke(args);
         }
 
-        private int ExecuteCommand(string rhetosHostAssemblyPath, string password)
+        private void ExecuteCommand(string rhetosHostAssemblyPath, string password)
         {
             var host = HostResolver.FindBuilder(rhetosHostAssemblyPath)
                 .ConfigureServices(serviceCollection => {
@@ -101,8 +111,6 @@ namespace AdminSetup
                 SetUpAdminAccount(scope.ServiceProvider, password);
                 scope.ServiceProvider.GetService<IRhetosComponent<IPersistenceTransaction>>().Value.CommitChanges();
             }
-
-            return 0;
         }
 
         private void SetUpAdminAccount(IServiceProvider scope, string password)

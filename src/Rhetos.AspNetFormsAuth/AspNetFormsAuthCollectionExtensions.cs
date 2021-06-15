@@ -31,8 +31,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Setup the required components for the <see cref="AuthenticationService"/>.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <returns></returns>
         public static RhetosServiceCollectionBuilder AddAspNetFormsAuth(this RhetosServiceCollectionBuilder builder, Action<AspNetFormsAuthOptions> configureOptions = null)
         {
             builder.Services.AddOptions();

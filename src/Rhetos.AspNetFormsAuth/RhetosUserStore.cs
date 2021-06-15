@@ -18,7 +18,6 @@
 */
 
 using Microsoft.AspNetCore.Identity;
-using Rhetos.Host.AspNet;
 using Rhetos.Persistence;
 using System;
 using System.Linq;
@@ -40,7 +39,7 @@ namespace Rhetos.AspNetFormsAuth
         {
             var userStoreType = nameof(IUserStore<IdentityUser<Guid>>);
             var userManagerType = nameof(UserManager<IdentityUser<Guid>>);
-            throw new NotSupportedException($"This ipmlementation of the {userStoreType} expects to have the Common.Principal already created." +
+            throw new NotSupportedException($"This implementation of the {userStoreType} expects to have the Common.Principal already created." +
                     $" Use the DomRepository class to create the Common.Principal and then find and update the user data with the {userManagerType} class.");
         }
 
@@ -62,7 +61,7 @@ namespace Rhetos.AspNetFormsAuth
                         Common.Principal cp
                         LEFT JOIN webpages_Membership m ON m.Userid = cp.AspNetUserId
                     WHERE cp.ID = @0",
-                    new object[] { user.Id},
+                    new object[] { user.Id },
                     reader => new
                     {
                         AspNetUserId = reader.IsDBNull(0) ? new int?() : reader.GetInt32(0),
@@ -72,11 +71,11 @@ namespace Rhetos.AspNetFormsAuth
                 if(principals.Count == 0)
                     return IdentityResult.Failed(new IdentityError { Description = "There is no Principal with the requested Id." });
 
-                var principal = principals.First();
+                var principal = principals.Single();
                 if (!principal.AspNetUserId.HasValue)
                     return IdentityResult.Failed(new IdentityError { Description = "The value for AspNetUserId in Common.Principal was not set for the requested user." });
 
-                if (principal.HasMembership.Value == true)
+                if (principal.HasMembership == true)
                 {
                     await persistenceTransaction.Value.ExecuteNonQueryAsync(@"
                         UPDATE m
@@ -90,7 +89,7 @@ namespace Rhetos.AspNetFormsAuth
                         WHERE cp.ID = @0",
                         user.Id, user.AccessFailedCount,
                         user.PasswordHash ?? string.Empty,
-                        user.LockoutEnd == null ? null : user.LockoutEnd.Value.DateTime);
+                        user.LockoutEnd?.DateTime);
                 }
                 else
                 {
@@ -99,7 +98,7 @@ namespace Rhetos.AspNetFormsAuth
                         INSERT INTO dbo.webpages_Membership (UserId, PasswordFailuresSinceLastSuccess, Password, PasswordSalt, LockoutEnd, IsConfirmed) VALUES(@0, @1, @2, @3,@4, @5)",
                         principal.AspNetUserId.Value, user.AccessFailedCount,
                         user.PasswordHash ?? string.Empty, string.Empty,
-                        user.LockoutEnd == null ? null : user.LockoutEnd.Value.DateTime,
+                        user.LockoutEnd?.DateTime,
                         true);
                 }
 
@@ -114,6 +113,7 @@ namespace Rhetos.AspNetFormsAuth
 
         public void Dispose()
         {
+            // Nothing to dispose.
         }
 
         public async Task<IdentityUser<Guid>> FindByIdAsync(string userId, CancellationToken cancellationToken)

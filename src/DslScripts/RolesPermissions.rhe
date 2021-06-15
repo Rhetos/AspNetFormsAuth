@@ -24,7 +24,7 @@
         SqlDependsOn Common.Principal;
     }
     
-    //This is the tables used by WebMatrix.WebData to store user authorization information
+    //This is the table used by WebMatrix.WebData to store user authorization information
 	SqlObject webpages_Membership 
         'IF (NOT EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
@@ -43,22 +43,20 @@
                     [PasswordSalt] [nvarchar](128) NOT NULL,
                     [PasswordVerificationToken] [nvarchar](128) NULL,
                     [PasswordVerificationTokenExpirationDate] [datetime] NULL,
-                PRIMARY KEY CLUSTERED 
-                (
-                    [UserId] ASC
-                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-                ) ON [PRIMARY]
+                    PRIMARY KEY CLUSTERED (
+                        [UserId] ASC
+                    )
+                )
 
-                ALTER TABLE [dbo].[webpages_Membership] ADD  DEFAULT ((0)) FOR [IsConfirmed]
+                ALTER TABLE [dbo].[webpages_Membership] ADD CONSTRAINT DF_webpages_IsConfirmed DEFAULT ((0)) FOR [IsConfirmed]
                 
-                ALTER TABLE [dbo].[webpages_Membership] ADD  DEFAULT ((0)) FOR [PasswordFailuresSinceLastSuccess]
+                ALTER TABLE [dbo].[webpages_Membership] ADD CONSTRAINT DF_webpages_PasswordFailuresSinceLastSuccess DEFAULT ((0)) FOR [PasswordFailuresSinceLastSuccess]
             END'
         ''
     {
         SqlDependsOn Common.Principal;
     }
 
-    //This is the tables used by WebMatrix.WebData to store user authorization information
 	SqlObject webpages_MembershipDefaultValueForCreateDate
         'ALTER TABLE [dbo].[webpages_Membership] ADD CONSTRAINT df_CreateDate DEFAULT GETDATE() FOR [CreateDate]'
         'ALTER TABLE [dbo].[webpages_Membership] DROP CONSTRAINT df_CreateDate'

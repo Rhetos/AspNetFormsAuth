@@ -20,7 +20,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rhetos.Host.AspNet.RestApi.Filters;
-using Rhetos.Utilities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -77,13 +76,16 @@ namespace Rhetos.AspNetFormsAuth
         public string NewPassword { get; set; }
     }
 
+    /// <summary>
+    /// Provides standard web methods for user authentication (login, logout, etc.).
+    /// </summary>
     [ServiceFilter(typeof(ApiExceptionFilter))]
     [ServiceFilter(typeof(ApiCommitOnSuccessFilter))]
     public class AuthenticationController : ControllerBase
     {
         private readonly AuthenticationService _authenticationService;
 
-        public AuthenticationController(AuthenticationService authenticationService, IUserInfo userInfo)
+        public AuthenticationController(AuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }

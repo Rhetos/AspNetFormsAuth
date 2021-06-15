@@ -19,7 +19,6 @@
 
 using Microsoft.AspNetCore.Identity;
 using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Host.AspNet;
 using Rhetos.Logging;
 using Rhetos.Security;
 using Rhetos.Utilities;
@@ -32,10 +31,11 @@ using System.Threading.Tasks;
 
 namespace Rhetos.AspNetFormsAuth
 {
+    /// <summary>
+    /// Provides implementation of the authentication methods (login, logout, etc.) for the <see cref="AuthenticationController"/>.
+    /// </summary>
     public class AuthenticationService
     {
-        public const int DefaultTokenExpirationInMinutes = 1440;
-
         private readonly ILogger _logger;
         private readonly Lazy<IAuthorizationManager> _authorizationManager;
         private readonly Lazy<IEnumerable<IPasswordStrength>> _passwordStrengthRules;
