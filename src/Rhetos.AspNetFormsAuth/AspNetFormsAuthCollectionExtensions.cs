@@ -29,7 +29,8 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class AspNetFormsAuthCollectionExtensions
     {
         /// <summary>
-        /// Setup the required components for the <see cref="AuthenticationService"/>.
+        /// Configures authentication for current application, using HTTP cookies.
+        /// Registers required components for the <see cref="AuthenticationController"/> and <see cref="AuthenticationService"/>.
         /// </summary>
         public static RhetosServiceCollectionBuilder AddAspNetFormsAuth(this RhetosServiceCollectionBuilder builder, Action<AspNetFormsAuthOptions> configureOptions = null)
         {

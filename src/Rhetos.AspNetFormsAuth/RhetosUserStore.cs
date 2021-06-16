@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace Rhetos.AspNetFormsAuth
 {
-    public class RhetosUserStore : IUserStore<IdentityUser<Guid>>, IUserPasswordStore<IdentityUser<Guid>>, IUserLockoutStore<IdentityUser<Guid>>
+    public sealed class RhetosUserStore : IUserStore<IdentityUser<Guid>>, IUserPasswordStore<IdentityUser<Guid>>, IUserLockoutStore<IdentityUser<Guid>>
     {
         private readonly IRhetosComponent<IPersistenceTransaction> persistenceTransaction;
 
