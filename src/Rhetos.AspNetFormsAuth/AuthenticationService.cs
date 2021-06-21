@@ -42,10 +42,12 @@ namespace Rhetos.AspNetFormsAuth
         private readonly Lazy<ISqlExecuter> _sqlExecuter;
         private readonly Lazy<ISendPasswordResetToken> _sendPasswordResetTokenPlugin;
         private readonly ILocalizer _localizer;
+        private readonly IRhetosComponent<IUserInfo> _userInfo;
         private readonly SignInManager<IdentityUser<Guid>> _signInManager;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
 
         public AuthenticationService(
+            IRhetosComponent<IUserInfo> userInfo,
             IRhetosComponent<ILogProvider> logProvider,
             IRhetosComponent<Lazy<IAuthorizationManager>> authorizationManager,
             IRhetosComponent<GenericRepositories> repositories,
@@ -59,6 +61,7 @@ namespace Rhetos.AspNetFormsAuth
             _authorizationManager = authorizationManager.Value;
             _sqlExecuter = sqlExecuter.Value;
             _sendPasswordResetTokenPlugin = new Lazy<ISendPasswordResetToken>(() => SinglePlugin(sendPasswordResetTokenPlugins.Value));
+            _userInfo = userInfo;
             _signInManager = signInManager;
             _userManager = userManager;
 
@@ -79,13 +82,13 @@ namespace Rhetos.AspNetFormsAuth
             return plugins.Value.Single();
         }
 
-        private void CheckPermissions(Claim claim, string userName)
+        private void CheckPermissions(Claim claim)
         {
             bool allowed = _authorizationManager.Value.GetAuthorizations(new[] { claim }).Single();
             if (!allowed)
                 throw new UserException(
                     "You are not authorized for action '{0}' on resource '{1}', user '{2}'. The required security claim is not set.",
-                    new[] { claim.Right, claim.Resource, userName },
+                    new[] { claim.Right, claim.Resource, _userInfo.Value.UserName },
                     null, null);
         }
 
@@ -120,13 +123,13 @@ namespace Rhetos.AspNetFormsAuth
         {
             _logger.Trace(() => "SetPassword: " + password);
 
-            CheckPermissions(AuthenticationServiceClaims.SetPasswordClaim, userName);
+            CheckPermissions(AuthenticationServiceClaims.SetPasswordClaim);
 
             ValidateNonEmptyString(userName, nameof(userName));
             ValidateNonEmptyString(password, nameof(password));
 
             if (ignorePasswordStrengthPolicy)
-                CheckPermissions(AuthenticationServiceClaims.IgnorePasswordStrengthPolicyClaim, userName);
+                CheckPermissions(AuthenticationServiceClaims.IgnorePasswordStrengthPolicyClaim);
             else
                 CheckPasswordStrength(password);
 
@@ -172,7 +175,7 @@ namespace Rhetos.AspNetFormsAuth
         {
             _logger.Trace(() => "UnlockUser: " + userName);
             ValidateNonEmptyString(userName, nameof(userName));
-            CheckPermissions(AuthenticationServiceClaims.UnlockUserClaim, userName);
+            CheckPermissions(AuthenticationServiceClaims.UnlockUserClaim);
 
             await SafeExecuteAsync(
                 async () =>
@@ -185,7 +188,7 @@ namespace Rhetos.AspNetFormsAuth
         public async Task<string> GeneratePasswordResetTokenAsync(string userName)
         {
             _logger.Trace(() => "GeneratePasswordResetToken: " + userName);
-            CheckPermissions(AuthenticationServiceClaims.GeneratePasswordResetTokenClaim, userName);
+            CheckPermissions(AuthenticationServiceClaims.GeneratePasswordResetTokenClaim);
             ValidateNonEmptyString(userName, nameof(userName));
             return await GeneratePasswordResetTokenInternalAsync(userName);
         }

@@ -128,6 +128,7 @@ namespace Rhetos.AspNetFormsAuth
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<string> GeneratePasswordResetToken([FromBody] GeneratePasswordResetTokenParameters parameters)
         {
             ValidateForEmptyParameters(parameters);

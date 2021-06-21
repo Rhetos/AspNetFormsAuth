@@ -24,6 +24,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Net;
 using System.Collections.Generic;
+using Rhetos.Utilities;
 
 namespace Rhetos.AspNetFormsAuth.Test
 {

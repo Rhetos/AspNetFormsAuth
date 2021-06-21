@@ -19,7 +19,9 @@
 
 using Microsoft.AspNetCore.Identity;
 using Rhetos.Persistence;
+using Rhetos.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,10 +31,12 @@ namespace Rhetos.AspNetFormsAuth
     public sealed class RhetosUserStore : IUserStore<IdentityUser<Guid>>, IUserPasswordStore<IdentityUser<Guid>>, IUserLockoutStore<IdentityUser<Guid>>
     {
         private readonly IRhetosComponent<IPersistenceTransaction> persistenceTransaction;
+        private readonly IRhetosComponent<ISqlExecuter> sqlExecuter;
 
-        public RhetosUserStore(IRhetosComponent<IPersistenceTransaction> persistenceTransaction)
+        public RhetosUserStore(IRhetosComponent<IPersistenceTransaction> persistenceTransaction, IRhetosComponent<ISqlExecuter> sqlExecuter)
         {
             this.persistenceTransaction = persistenceTransaction;
+            this.sqlExecuter = sqlExecuter;
         }
 
         public Task<IdentityResult> CreateAsync(IdentityUser<Guid> user, CancellationToken cancellationToken)
@@ -53,19 +57,19 @@ namespace Rhetos.AspNetFormsAuth
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                var principals = await persistenceTransaction.Value.ExecuteQueryAsync(@"
+                var principals = new List<(int? AspNetUserId, bool? HasMembership)>();
+                await sqlExecuter.Value.ExecuteReaderInterpolatedAsync($@"
                     SELECT
                         cp.AspNetUserId,
                         HasMembership = CAST(CASE WHEN m.Userid IS NULL THEN 0 ELSE 1 END AS BIT)
                     FROM
                         Common.Principal cp
                         LEFT JOIN webpages_Membership m ON m.Userid = cp.AspNetUserId
-                    WHERE cp.ID = @0",
-                    new object[] { user.Id },
-                    reader => new
+                    WHERE cp.ID = {user.Id}",
+                    reader =>
                     {
-                        AspNetUserId = reader.IsDBNull(0) ? new int?() : reader.GetInt32(0),
-                        HasMembership = reader.IsDBNull(1) ? new bool?() : reader.GetBoolean(1)
+                        principals.Add((reader.IsDBNull(0) ? new int?() : reader.GetInt32(0),
+                            reader.IsDBNull(1) ? new bool?() : reader.GetBoolean(1)));
                     });
 
                 if(principals.Count == 0)
@@ -75,31 +79,27 @@ namespace Rhetos.AspNetFormsAuth
                 if (!principal.AspNetUserId.HasValue)
                     return IdentityResult.Failed(new IdentityError { Description = "The value for AspNetUserId in Common.Principal was not set for the requested user." });
 
+                var lockoutEnd = user.LockoutEnd == null ? new DateTime?() : user.LockoutEnd.Value.DateTime;
+                var passwordHash = user.PasswordHash ?? string.Empty;
                 if (principal.HasMembership == true)
                 {
-                    await persistenceTransaction.Value.ExecuteNonQueryAsync(@"
+                    await sqlExecuter.Value.ExecuteSqlInterpolatedAsync($@"
                         UPDATE m
                         SET
-                            PasswordFailuresSinceLastSuccess = @1,
-                            Password = @2,
-                            LockoutEnd = @3
+                            PasswordFailuresSinceLastSuccess = {user.AccessFailedCount},
+                            Password = {passwordHash},
+                            LockoutEnd = {lockoutEnd}
                         FROM 
                             dbo.webpages_Membership m
                             LEFT JOIN Common.Principal cp ON cp.AspNetUserId = m.UserId
-                        WHERE cp.ID = @0",
-                        user.Id, user.AccessFailedCount,
-                        user.PasswordHash ?? string.Empty,
-                        user.LockoutEnd?.DateTime);
+                        WHERE cp.ID = {user.Id}");
                 }
                 else
                 {
                     //In the previous version of the plugin the field IsConfirmed was not used and it was always set to true
-                    await persistenceTransaction.Value.ExecuteNonQueryAsync(@"
-                        INSERT INTO dbo.webpages_Membership (UserId, PasswordFailuresSinceLastSuccess, Password, PasswordSalt, LockoutEnd, IsConfirmed) VALUES(@0, @1, @2, @3,@4, @5)",
-                        principal.AspNetUserId.Value, user.AccessFailedCount,
-                        user.PasswordHash ?? string.Empty, string.Empty,
-                        user.LockoutEnd?.DateTime,
-                        true);
+                    await sqlExecuter.Value.ExecuteSqlInterpolatedAsync($@"
+                        INSERT INTO dbo.webpages_Membership (UserId, PasswordFailuresSinceLastSuccess, Password, PasswordSalt, LockoutEnd, IsConfirmed)
+                        VALUES({principal.AspNetUserId.Value}, {user.AccessFailedCount}, {passwordHash}, {string.Empty}, {lockoutEnd}, {true})");
                 }
 
                 return IdentityResult.Success;
@@ -118,7 +118,7 @@ namespace Rhetos.AspNetFormsAuth
 
         public async Task<IdentityUser<Guid>> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            return await QueryUser(@"
+            return await QueryUser($@"
                 SELECT
                     cp.ID,
                     m.Password,
@@ -128,12 +128,12 @@ namespace Rhetos.AspNetFormsAuth
                 FROM
                     Common.Principal cp
                     LEFT JOIN webpages_Membership m ON m.Userid = cp.AspNetUserId
-                WHERE cp.ID = @0", userId);
+                WHERE cp.ID = {userId}");
         }
 
         public async Task<IdentityUser<Guid>> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            return await QueryUser(@"
+            return await QueryUser($@"
                 SELECT
                     cp.ID,
                     m.Password,
@@ -143,14 +143,15 @@ namespace Rhetos.AspNetFormsAuth
                 FROM
                     Common.Principal cp
                     LEFT JOIN webpages_Membership m ON m.Userid = cp.AspNetUserId
-                WHERE cp.Name = @0", normalizedUserName);
+                WHERE cp.Name = {normalizedUserName}");
         }
 
-        private async Task<IdentityUser<Guid>> QueryUser(string query, params object[] parameters)
+        private async Task<IdentityUser<Guid>> QueryUser(FormattableString query)
         {
-            var results = await this.persistenceTransaction.Value.ExecuteQueryAsync(query, parameters, (reader) =>
+            var results = new List<IdentityUser<Guid>>();
+            await sqlExecuter.Value.ExecuteReaderInterpolatedAsync(query, reader =>
             {
-                return new IdentityUser<Guid>
+                results.Add(new IdentityUser<Guid>
                 {
                     Id = reader.GetGuid(0),
                     PasswordHash = reader.IsDBNull(1) ? null : ReturnNullIfStringIsEmpty(reader.GetString(1)),
@@ -158,7 +159,7 @@ namespace Rhetos.AspNetFormsAuth
                     UserName = reader.IsDBNull(3) ? null : reader.GetString(3),
                     LockoutEnd = reader.IsDBNull(4) ? null : DateTime.SpecifyKind(reader.GetDateTime(4), DateTimeKind.Utc),
                     LockoutEnabled = true
-                };
+                });
             });
 
             return results.FirstOrDefault();

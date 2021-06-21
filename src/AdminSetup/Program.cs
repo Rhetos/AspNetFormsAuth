@@ -125,9 +125,11 @@ namespace AdminSetup
             if(userManager == null)
                 throw new ApplicationException($"The AspNetFormsAuth package is not configured properly. Call the {nameof(AspNetFormsAuthCollectionExtensions.AddAspNetFormsAuth)} method on the {nameof(IServiceCollection)} inside the Startup.ConfigureServices method.");
            
-            var persistenceTransaction = scope.GetService<IRhetosComponent<IPersistenceTransaction>>();
+            var sqlExecuter = scope.GetService<IRhetosComponent<ISqlExecuter>>();
 
-            var principalCount = persistenceTransaction.Value.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Common.Principal WHERE Name = @0", new object[] { adminUserName }).Result;
+            var principalCount = 0;
+            sqlExecuter.Value.ExecuteReaderInterpolated($"SELECT COUNT(*) FROM Common.Principal WHERE Name = {adminUserName}",
+                reader => principalCount = reader.GetInt32(0));
             if (principalCount == 0)
                 throw new ApplicationException($"Missing '{adminUserName}' user entry in Common.Principal entity. Please execute the 'rhetos dbupdate' command, with AspNetFormsAuth package included, to initialize the 'admin' user entry.");
 
