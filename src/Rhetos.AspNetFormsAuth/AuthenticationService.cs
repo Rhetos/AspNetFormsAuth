@@ -219,7 +219,7 @@ namespace Rhetos.AspNetFormsAuth
 
                 // Don't return an internal error to the client. Log it and return a generic error message:
                 _logger.Error(logErrorFormat, userName, ex);
-                throw new FrameworkException(FrameworkException.GetInternalServerErrorMessage(_localizer, ex));
+                throw new FrameworkException(ErrorReporting.GetInternalServerErrorMessage(_localizer, ex));
             }
         }
 
