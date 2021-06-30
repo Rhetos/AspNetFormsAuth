@@ -79,16 +79,14 @@ namespace Rhetos.AspNetFormsAuth
                 if (!principal.AspNetUserId.HasValue)
                     return IdentityResult.Failed(new IdentityError { Description = "The value for AspNetUserId in Common.Principal was not set for the requested user." });
 
-                var lockoutEnd = user.LockoutEnd == null ? new DateTime?() : user.LockoutEnd.Value.DateTime;
-                var passwordHash = user.PasswordHash ?? string.Empty;
                 if (principal.HasMembership == true)
                 {
                     await sqlExecuter.Value.ExecuteSqlInterpolatedAsync($@"
                         UPDATE m
                         SET
                             PasswordFailuresSinceLastSuccess = {user.AccessFailedCount},
-                            Password = {passwordHash},
-                            LockoutEnd = {lockoutEnd}
+                            Password = {user.PasswordHash ?? string.Empty},
+                            LockoutEnd = {user.LockoutEnd?.DateTime}
                         FROM 
                             dbo.webpages_Membership m
                             LEFT JOIN Common.Principal cp ON cp.AspNetUserId = m.UserId
@@ -99,7 +97,7 @@ namespace Rhetos.AspNetFormsAuth
                     //In the previous version of the plugin the field IsConfirmed was not used and it was always set to true
                     await sqlExecuter.Value.ExecuteSqlInterpolatedAsync($@"
                         INSERT INTO dbo.webpages_Membership (UserId, PasswordFailuresSinceLastSuccess, Password, PasswordSalt, LockoutEnd, IsConfirmed)
-                        VALUES({principal.AspNetUserId.Value}, {user.AccessFailedCount}, {passwordHash}, {string.Empty}, {lockoutEnd}, {true})");
+                        VALUES({principal.AspNetUserId.Value}, {user.AccessFailedCount}, {user.PasswordHash ?? string.Empty}, {string.Empty}, {user.LockoutEnd?.DateTime}, {true})");
                 }
 
                 return IdentityResult.Success;
