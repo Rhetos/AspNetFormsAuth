@@ -93,19 +93,12 @@ namespace AdminSetup
 
         private void ExecuteCommand(string rhetosHostAssemblyPath, string password)
         {
-            var host = HostResolver.FindBuilder(rhetosHostAssemblyPath)
-                .ConfigureServices(serviceCollection => {
-                    serviceCollection.Configure<RhetosHostBuilderOptions>(o =>
-                    {
-                        o.ConfigureActions.Add((serviceProvider, rhetosHostBuilder) =>
-                        {
-                            rhetosHostBuilder.ConfigureContainer(builder => builder.RegisterType<ConsoleLogProvider>().As<ILogProvider>().SingleInstance());
-                        });
-                    });
-                    serviceCollection.AddScoped<IUserInfo, ProcessUserInfo>();
-                })
-                .Build();
-            using (var scope = host.Services.CreateScope())
+            var hostServices = RhetosHost.GetHostServices(
+                rhetosHostAssemblyPath,
+                rhetosHostBuilder => rhetosHostBuilder.ConfigureContainer(builder => builder.RegisterType<ConsoleLogProvider>().As<ILogProvider>().SingleInstance()),
+                (hostBuilderContext, serviceCollection) => serviceCollection.AddScoped<IUserInfo, ProcessUserInfo>());
+
+            using (var scope = hostServices.CreateScope())
             {
                 scope.ServiceProvider.GetService<IRhetosComponent<AdminUserInitializer>>().Value.Initialize();
                 SetUpAdminAccount(scope.ServiceProvider, password);

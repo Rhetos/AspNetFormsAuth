@@ -29,4 +29,11 @@
     <Copy SourceFiles="@(AspNetFormsAuthDslScripts)" DestinationFolder="DslScripts\AspNetFormsAuth" SkipUnchangedFiles="true" />
   </Target>
 
+  <Target Name="CopyAdminSetupExe" AfterTargets="Build">
+    <ItemGroup>
+      <AdminSetupBinaries Include="..\..\src\AdminSetup\bin\Debug\net5.0\AdminSetup.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AdminSetupBinaries)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>
