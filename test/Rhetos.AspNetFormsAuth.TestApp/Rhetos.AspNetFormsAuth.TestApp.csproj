@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rhetos.CommonConcepts" Version="5.0.0-dev*" />
+    <PackageReference Include="Rhetos.Host" Version="5.0.0-dev*" />
+    <PackageReference Include="Rhetos.MSBuild" Version="5.0.0-dev*" />
+    <PackageReference Include="Rhetos.Host.AspNet" Version="5.0.0-dev*" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Rhetos.AspNetFormsAuth\Rhetos.AspNetFormsAuth.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="rhetos-app.local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyDslScripts" BeforeTargets="ResolveRhetosBuildItems">
+    <ItemGroup>
+      <AspNetFormsAuthDslScripts Include="..\..\src\DslScripts\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AspNetFormsAuthDslScripts)" DestinationFolder="DslScripts\AspNetFormsAuth" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

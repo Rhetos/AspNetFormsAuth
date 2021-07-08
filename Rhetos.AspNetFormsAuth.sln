@@ -1,15 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminSetup", "Plugins\AdminSetup\AdminSetup.csproj", "{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdminSetup", "src\AdminSetup\AdminSetup.csproj", "{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InitAspNetDatabase", "Plugins\InitAspNetDatabase\InitAspNetDatabase.csproj", "{D0AA25A2-8D00-472A-9395-26003D89A702}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth", "src\Rhetos.AspNetFormsAuth\Rhetos.AspNetFormsAuth.csproj", "{8CE0595E-B553-48D0-8848-9ECB254B2973}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth", "Plugins\Rhetos.AspNetFormsAuth\Rhetos.AspNetFormsAuth.csproj", "{8CE0595E-B553-48D0-8848-9ECB254B2973}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.TestApp", "test\Rhetos.AspNetFormsAuth.TestApp\Rhetos.AspNetFormsAuth.TestApp.csproj", "{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.AspNetFormsAuth.Interfaces", "Plugins\Rhetos.AspNetFormsAuth.Interfaces\Rhetos.AspNetFormsAuth.Interfaces.csproj", "{B818F493-EF0C-448F-A89F-FC805FFA879E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.AspNetFormsAuth.Test", "test\Rhetos.AspNetFormsAuth.Test\Rhetos.AspNetFormsAuth.Test.csproj", "{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{55A14E81-C74F-4A30-B60E-D401D3D4D3B4}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		Build.bat = Build.bat
+		ChangeLog.md = ChangeLog.md
+		Directory.Build.props = Directory.Build.props
+		Readme.md = Readme.md
+		Rhetos.AspNetFormsAuth.nuspec = Rhetos.AspNetFormsAuth.nuspec
+		Test.bat = Test.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,18 +32,18 @@ Global
 		{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D5BEF32-A7D3-4580-AE84-0DC2A144231A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0AA25A2-8D00-472A-9395-26003D89A702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0AA25A2-8D00-472A-9395-26003D89A702}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0AA25A2-8D00-472A-9395-26003D89A702}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0AA25A2-8D00-472A-9395-26003D89A702}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8CE0595E-B553-48D0-8848-9ECB254B2973}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CE0595E-B553-48D0-8848-9ECB254B2973}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CE0595E-B553-48D0-8848-9ECB254B2973}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CE0595E-B553-48D0-8848-9ECB254B2973}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B818F493-EF0C-448F-A89F-FC805FFA879E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7011208-3E8A-4CA7-9B4B-F9EF30C514FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5CA7C95-F2AE-4BCB-B04C-AC77D8A5F918}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

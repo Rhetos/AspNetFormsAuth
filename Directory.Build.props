@@ -1,0 +1,12 @@
+﻿<Project>
+  <PropertyGroup>
+    <LangVersion>9.0</LangVersion>
+    <Company>Omega software</Company>
+    <Copyright>Copyright (C) Omega software 2017</Copyright>
+    <AssemblyVersion>5.0.0</AssemblyVersion>
+    <FileVersion>5.0.0</FileVersion>
+    <InformationalVersion>5.0.0-dev</InformationalVersion>
+    <NoWarn>1701,1702,1591,1573</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

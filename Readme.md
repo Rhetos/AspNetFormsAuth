@@ -135,13 +135,15 @@ Reset the number of [failed login attempts](#maximum-failed-password-attempts).
 
 Generates a password reset token.
 
-* Interface: `(string UserName, int TokenExpirationInMinutesFromNow) -> string`
+* Interface: `(string UserName) -> string`
 * This method is typically called by an administrator or a web application with administrator privileges
   in order to create a user account without initial password and let a user choose it, or to implement forgot-password functionality.
 * To implement forgot-password functionality *without* using administrator privileges in web application,
   use [`SendPasswordResetToken`](#sendpasswordresettoken) method instead (see [Forgot password](#forgot-password)).
 * Requires `GeneratePasswordResetToken` [security claim](#permissions-and-claims).
-* If TokenExpirationInMinutesFromNow parameter is not set (or set to 0), the token will expire in 24 hours.
+* To configure the token expiration time, set
+  the [DataProtectionTokenProviderOptions.TokenLifespan](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.dataprotectiontokenprovideroptions.tokenlifespan?view=aspnetcore-5.0)
+  property inside the Startup.ConfigureServices method of your web application.
 
 ### SendPasswordResetToken
 
@@ -155,9 +157,9 @@ Generates a password reset token and sends it to the user.
   The implementation must be provided by an additional plugin. For example:
   * Use the [SimpleSPRTEmail](https://github.com/Rhetos/SimpleSPRTEmail) plugin package for sending token by email,
   * or follow [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken) to implement a different sending method.
-* Use `AspNetFormsAuth.SendPasswordResetToken.ExpirationInMinutes` appSettings key in `web.config` to set the token expiration timeout.
-  Default value is 1440 minutes (24 hours).
-  For example: `<add key="AspNetFormsAuth.SendPasswordResetToken.ExpirationInMinutes" value="60" />`.
+* To configure the token expiration time, set
+  the [DataProtectionTokenProviderOptions.TokenLifespan](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.dataprotectiontokenprovideroptions.tokenlifespan?view=aspnetcore-5.0)
+  property inside the Startup.ConfigureServices method of your web application.
 
 ### ResetPassword
 

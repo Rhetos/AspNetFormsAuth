@@ -1,0 +1,129 @@
+﻿Module Common
+{
+	// Obsolete. Will be removed in a future release.
+	LegacyEntity Permission 'Common.RolePermission'
+	{
+		Reference Role Common.Role { Required; LegacyProperty 'RoleID' 'Common.Role' 'ID'; }
+		Reference Claim Common.Claim { Required; LegacyProperty 'ClaimID' 'Common.Claim' 'ID'; }
+		Bool IsAuthorized { Required; }
+		
+		SqlDependsOn Common.RolePermission;
+	}
+	
+	// Adding ASP.NET user ID to the existing Common.Principal from CommonConcepts package.
+    Entity Principal
+    {
+        Integer AspNetUserId { SystemRequired; Unique; } // Automatically generated, see SqlTrigger GenerateAspNetUserId.
+    }
+    
+	// ASP.NET SimpleMembershipProvider requires the user table (view) to be in the dbo schema.
+    SqlObject aspnet_Principal 
+        'CREATE VIEW dbo.aspnet_Principal AS SELECT * FROM Common.Principal'
+        'DROP VIEW dbo.aspnet_Principal'
+    {
+        SqlDependsOn Common.Principal;
+    }
+    
+    //This is the table used by WebMatrix.WebData to store user authorization information
+	SqlObject webpages_Membership 
+        'IF (NOT EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = ''dbo'' 
+                 AND  TABLE_NAME = ''webpages_Membership''))
+            BEGIN
+                CREATE TABLE [dbo].[webpages_Membership](
+                    [UserId] [int] NOT NULL,
+                    [CreateDate] [datetime] NULL,
+                    [ConfirmationToken] [nvarchar](128) NULL,
+                    [IsConfirmed] [bit] NULL,
+                    [LastPasswordFailureDate] [datetime] NULL,
+                    [PasswordFailuresSinceLastSuccess] [int] NOT NULL,
+                    [Password] [nvarchar](128) NOT NULL,
+                    [PasswordChangedDate] [datetime] NULL,
+                    [PasswordSalt] [nvarchar](128) NOT NULL,
+                    [PasswordVerificationToken] [nvarchar](128) NULL,
+                    [PasswordVerificationTokenExpirationDate] [datetime] NULL,
+                    PRIMARY KEY CLUSTERED (
+                        [UserId] ASC
+                    )
+                )
+
+                ALTER TABLE [dbo].[webpages_Membership] ADD CONSTRAINT DF_webpages_IsConfirmed DEFAULT ((0)) FOR [IsConfirmed]
+                
+                ALTER TABLE [dbo].[webpages_Membership] ADD CONSTRAINT DF_webpages_PasswordFailuresSinceLastSuccess DEFAULT ((0)) FOR [PasswordFailuresSinceLastSuccess]
+            END'
+        ''
+    {
+        SqlDependsOn Common.Principal;
+    }
+
+	SqlObject webpages_MembershipDefaultValueForCreateDate
+        'ALTER TABLE [dbo].[webpages_Membership] ADD CONSTRAINT df_CreateDate DEFAULT GETDATE() FOR [CreateDate]'
+        'ALTER TABLE [dbo].[webpages_Membership] DROP CONSTRAINT df_CreateDate'
+    {
+        SqlDependsOnSqlObject Common.webpages_Membership;
+    }
+
+	SqlObject webpages_MembershipLockoutEndColumn
+        'ALTER TABLE [dbo].[webpages_Membership] ADD [LockoutEnd] [datetime]'
+        'ALTER TABLE [dbo].[webpages_Membership] DROP COLUMN [LockoutEnd]'
+    {
+        SqlDependsOnSqlObject Common.webpages_Membership;
+    }
+
+    SqlObject webpages_MembershipSetPasswordChangedDate
+        'CREATE TRIGGER [dbo].[tr_webpages_Membership_PasswordModification]
+            ON [dbo].[webpages_Membership]
+            AFTER INSERT, UPDATE
+            AS BEGIN
+                UPDATE [dbo].[webpages_Membership] 
+                SET
+                    PasswordChangedDate = GETDATE()
+                FROM
+                    [dbo].[webpages_Membership] m
+                    INNER JOIN inserted i ON m.UserId = i.UserId
+                    LEFT JOIN deleted d ON m.UserId = d.UserId
+                WHERE d.Password <> i.Password OR (d.Password IS NULL AND i.Password IS NOT NULL) OR (d.Password IS NOT NULL AND i.Password IS NULL)
+            END'
+        'DROP TRIGGER [dbo].[tr_webpages_Membership_PasswordModification]'
+    {
+        SqlDependsOnSqlObject Common.webpages_Membership;
+    }
+
+	// The trigger generates unique AspNetUserId that does not exist in webpages_Membership nor Principal.
+    SqlTrigger Principal.'GenerateAspNetUserId' 'INSTEAD OF INSERT'
+        "DECLARE @Error INT;
+        
+        SELECT * INTO #t FROM inserted;
+
+        -- Inserting specified AspNetUserId values, to include them in later analysis of the maximum value.
+        INSERT INTO Common.Principal SELECT * FROM #t WHERE AspNetUserId IS NOT NULL;
+        SET @Error = @@ERROR IF @Error > 0 BEGIN ROLLBACK TRANSACTION RETURN END
+
+        DELETE FROM #t WHERE AspNetUserId IS NOT NULL;
+
+        DECLARE @lastId INTEGER;
+        IF OBJECT_ID('webpages_Membership') IS NOT NULL
+        BEGIN
+            EXEC @Error = sp_executesql
+                N'SELECT @lastId = ISNULL(MAX(AspNetUserId), 0)
+                    FROM (SELECT AspNetUserId FROM Common.Principal WITH (UPDLOCK)
+                        UNION ALL SELECT UserId FROM webpages_Membership) x', N'@lastId INTEGER OUTPUT', @lastId OUTPUT;
+            SET @Error = ISNULL(NULLIF(@Error, 0), @@ERROR) IF @Error > 0 BEGIN ROLLBACK TRANSACTION RAISERROR('Error finding maximal AspNetUserId.',16,10) RETURN END;
+        END
+        ELSE
+            SELECT @lastId = ISNULL(MAX(AspNetUserId), 0) FROM Common.Principal;
+
+        SELECT ID, GeneratedId = @lastId + ROW_NUMBER() OVER (ORDER BY Name)
+        INTO #PrincipalNewId
+        FROM #t WHERE AspNetUserId IS NULL;
+
+        UPDATE #t
+        SET AspNetUserId = pni.GeneratedId
+        FROM #t
+        INNER JOIN #PrincipalNewId pni ON pni.ID = #t.ID
+        WHERE #t.AspNetUserId IS NULL;
+
+        INSERT INTO Common.Principal SELECT * FROM #t;
+        SET @Error = @@ERROR IF @Error > 0 BEGIN ROLLBACK TRANSACTION RETURN END";
+}

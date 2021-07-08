@@ -1,0 +1,10 @@
+﻿Module Common
+{
+    Entity AspNetFormsAuthPasswordStrength
+    {
+        ShortString RegularExpression;
+        ShortString RuleDescription; // Used as an error message to the user.
+        
+        Implements 'Rhetos.AspNetFormsAuth.IPasswordStrength, Rhetos.AspNetFormsAuth' { RegisteredImplementation; }
+    }
+}
