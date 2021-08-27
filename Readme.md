@@ -1,7 +1,7 @@
 # AspNetFormsAuth
 
 AspNetFormsAuth is a plugin package for [Rhetos development platform](https://github.com/Rhetos/Rhetos).
-It provides an implementation of **ASP.NET forms authentication** to Rhetos server applications.
+It provides an implementation of **ASP.NET Core Identity authentication** to Rhetos server applications.
 
 The authentication is implemented using Microsoft's *WebMatrix SimpleMembershipProvider*,
 with recommended security best practices such as password salting and hashing.
@@ -49,10 +49,8 @@ Table of contents:
 
 ### Authentication
 
-* For developers and administrators, a simple login and logout web forms are provided.
-  Links are available on the Rhetos server home page.
 * [Authentication service](#authentication-service-api) may be used in web applications
-  and other services to log in and log out users, and for other related actions.
+  and other services to login and logout users, and for other related actions.
 * Forms authentication may be utilized for [sharing the authentication](#sharing-the-authentication-across-web-applications)
   across multiple web applications.
 
@@ -78,10 +76,6 @@ There are two recommended ways of implementing *forgot password* functionality w
   the password reset token and send it to the user. In order to use this method,
   an implementation of sending the token (by SMS or email, e.g.) should be provided by an additional plugin
   (see [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)).
-
-### Simple administration GUI
-
-For testing and administration, a simple web GUI is available at the Rhetos server homepage under *AspNetFormsAuth* header.
 
 ## Authentication service API
 
@@ -174,78 +168,51 @@ Allows a user to set the initial password or reset the forgotten password, using
 
 ## Installation
 
-To install this package to a Rhetos server, add it to the Rhetos server's *RhetosPackages.config* file
-and make sure the NuGet package location is listed in the *RhetosPackageSources.config* file.
+1. Add package to `.csproj` file:
 
-* The package ID is "**Rhetos.AspNetFormsAuth**".
-  This package is available at the [NuGet.org](https://www.nuget.org/) online gallery.
-  The Rhetos server can install the package directly from there, if the gallery is listed in *RhetosPackageSources.config* file.
-* For more information, see [Installing plugin packages](https://github.com/Rhetos/Rhetos/wiki/Installing-plugin-packages).
-
-Before or after deploying the AspNetFormsAuth packages, please make the following changes to the web site configuration,
-in order for the forms authentication to work:
-
-### 1. Modify Web.config
-
-1. Comment out or delete the following **two occurrences** of the `security` element:
-
-    ```XML
-    <security mode="TransportCredentialOnly">
-      <transport clientCredentialType="Windows" />
-    </security>
-    ...
-    <security mode="TransportCredentialOnly">
-      <transport clientCredentialType="Windows" />
-    </security>
-    ```
-
-2. Remove the `<authentication mode="Windows" />` element.
-3. Inside the `<system.web>` element add the following:
-
-    ```XML
-    <authentication mode="Forms" />
-    <roleManager enabled="true" />
-    <membership defaultProvider="SimpleMembershipProvider">
-      <providers>
-        <clear />
-        <add name="SimpleMembershipProvider" type="WebMatrix.WebData.SimpleMembershipProvider, WebMatrix.WebData" />
-      </providers>
-    </membership>
-    <authorization>
-      <deny users="?" />
-    </authorization>
-    ```
-
-### 2. Configure IIS
-
-1. Start IIS Manager -> Select the web site -> Open "Authentication" feature.
-2. On the Authentication page **enable** *Anonymous Authentication* and *Forms Authentication*,
-   **disable** *Windows Authentication* and every other.
-3. Allow IIS system accounts read access to the Rhetos server folder and write access to the Rhetos logs folder (the "Logs" subfolder or directly in the Rhetos server folder, depending on the settings in *web.config*), by entering these commands to the command prompt *as administrator*, in the "RhetosServer" folder:
-
-        ICACLS . /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(RX)
-        ICACLS . /grant "NT AUTHORITY\IUSR":(OI)(CI)(RX)
-        IF NOT EXIST Logs\ MD Logs
-        ICACLS .\Logs /grant "BUILTIN\IIS_IUSRS":(OI)(CI)(M)
-        ICACLS .\Logs /grant "NT AUTHORITY\IUSR":(OI)(CI)(M)
-
-### 3. Configure IIS Express
-
-Note: *(Only if using IIS Express instead of IIS server)*
-
-If using IIS Express, after deploying AspNetFormsAuth package, execute `SetupRhetosServer.bat`
-utility in Rhetos server's folder to automatically configure `IISExpress.config`,
-or manually apply the following lines in IISExpress configuration file inside `system.webServer` element
-or inside `location / system.webServer` (usually at the end of the file):
-
-```XML
-<security>
-    <authentication>
-        <anonymousAuthentication enabled="false" />
-        <windowsAuthentication enabled="true" />
-    </authentication>
-</security>
+```xml
+<PackageReference Include="Rhetos.AspNetFormsAuth" Version="5.0.0-dev*" />
 ```
+
+2. Modify lines in `Startup.cs`, method `ConfigureServices` to:
+
+```cs
+services.AddRhetos(ConfigureRhetosHostBuilder)
+    .AddAspNetFormsAuth();
+```
+
+3. Add to `Startup.cs`, method `Configure` **before** line `app.UseAuthentication()`:
+
+```cs
+app.UseRhetosAspNetFormsAuth();
+```
+
+* Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
+
+```cs
+services.AddAuthentication(...
+```
+
+* If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
+
+```cs
+app.UseSwaggerUI(c =>
+{
+  c.SwaggerEndpoint("/swagger/rhetos/swagger.json", "Rhetos REST API");
+});
+```
+
+## IIS Configuration
+
+1. You could publish your application by use the feature Publish project in Visual Studio or you also use [dotnet cli to publish](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish) it instead.
+
+2. Install latest [.NET Core module](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/aspnet-core-module) for IIS.
+
+3. Create your web application on [IIS](https://docs.microsoft.com/en-us/iis/configuration/system.applicationhost/sites/site/application/).
+
+- Start IIS Manager -> Select the web application -> Open "Authentication" feature, make sure you set this:
+**enable** *Anonymous Authentication*,
+   **disable** *Windows Authentication*, *Forms Authentication* and every other.
 
 ### 4. Set up HTTPS
 
@@ -260,7 +227,7 @@ in development or QA environment.
 
 ## Configuration
 
-### Set the *admin* user password
+### Admin user password
 
 Note: When deploying the AspNetFormsAuth packages, it will automatically create
 the *admin* user account and *SecurityAdministrator* role, add the account to the role
@@ -268,7 +235,11 @@ and give it necessary permissions (claims) for all authentication service method
 
 After deployment:
 
-1. Run the Rhetos utility `bin\Plugins\AdminSetup.exe` to initialize the *admin* user's password.
+* Run the Rhetos utility `bin\...\AdminSetup.exe` to initialize the *admin* user's password. The command would like this:
+
+```
+AdminSetup.exe <your app dll> --password <your password>
+```
 
 ### Permissions and claims
 
@@ -307,64 +278,13 @@ RegularExpression|RuleDescription
 `[A-Z]`          | The password must contain at least one uppercase letters.
 `\W`             | The password must contain at least one special character (not a letter or a digit).
 
-### Overriding IIS binding configuration
-
-WebServiceHost will automatically create HTTP and HTTPS REST-like endpoint/binding/behavior pairs if service endpoint/binding/behavior configuration is empty.
-
-If you need to override default behavior (i.e. enable only HTTPS), you need to add following in `services` section:
-
-```XML
-<service name="Rhetos.AspNetFormsAuth.AuthenticationService">
-  <clear />
-  <endpoint binding="webHttpBinding" bindingConfiguration="rhetosWebHttpsBinding" contract="Rhetos.AspNetFormsAuth.AuthenticationService" />
-</service>
-```
-
-Also, you need to define new `webHttpBinding` `binding` item:
-
-```XML
-<binding name="rhetosWebHttpsBinding" maxReceivedMessageSize="209715200">
-  <security mode="Transport" />
-  <readerQuotas maxArrayLength="209715200" maxStringContentLength="209715200" />
-</binding>
-```
-
 ## Uninstallation
 
-When returning Rhetos server from Forms Authentication back to **Windows Authentication**, the following configuration changes should be done:
+1. Remove package Rhetos.AspNetFormsAuth from your project (`.csproj` file).
 
-### Modify Web.config
+2. Remove `.AddAspNetFormsAuth` line in `Startup.cs`, method `ConfigureServices`.
 
-1. Add (or uncomment) the following element inside all `<binding ...>` elements:
-
-    ```XML
-    <security mode="TransportCredentialOnly">
-        <transport clientCredentialType="Windows" />
-    </security>
-    ```
-
-2. Inside `<system.web>` remove following elements:
-
-    ```XML
-    <authentication mode="Forms" />
-    <roleManager enabled="true" />
-    <membership defaultProvider="SimpleMembershipProvider">
-      <providers>
-        <clear />
-        <add name="SimpleMembershipProvider" type="WebMatrix.WebData.SimpleMembershipProvider, WebMatrix.WebData" />
-      </providers>
-    </membership>
-    <authorization>
-      <deny users="?" />
-    </authorization>
-    ```
-
-3. Inside `<system.web>` add the `<authentication mode="Windows" />` element.
-
-### Configure IIS
-
-1. Start IIS Manager -> Select the web site -> Open "Authentication" feature.
-2. On the Authentication page **disable** *Anonymous Authentication* and *Forms Authentication*, **enable** *Windows Authentication*.
+3. Remove `app.UseRhetosAspNetFormsAuth()` line in `Startup.cs`, method `Configure`.
 
 ## Sharing the authentication across web applications
 
@@ -387,16 +307,8 @@ If you have multiple Rhetos applications on a single server and do not want to s
 
 ## Session timeout
 
-ASP.NET forms authentication ticket will expire after 30 minutes of **client inactivity**, by default.
-To allow user to stay logged in after longer time of inactivity, add standard [ASP.NET configuration](https://msdn.microsoft.com/en-us/library/1d3t3c61(v=vs.100).aspx) option `timeout` (in minutes) in Web.config:
-
-```XML
-<system.web>
-     <authentication mode="Forms">
-       <forms timeout="50000000"/>
-     </authentication>
-</system.web>
-```
+ASP.NET Identity authentication ticket will expire after 14 days, by default.
+[You could check it here](https://github.com/dotnet/aspnetcore/blob/8b30d862de6c9146f466061d51aa3f1414ee2337/src/Security/Authentication/Cookies/src/CookieAuthenticationOptions.cs#L31).
 
 ## Implementing SendPasswordResetToken
 
@@ -412,7 +324,7 @@ In order to implement a custom method of sending the token to the user (by SMS o
 create a Rhetos plugin package with a class that implements the `Rhetos.AspNetFormsAuth.ISendPasswordResetToken` interface
 from `Rhetos.AspNetFormsAuth.Interfaces.dll`.
 The class must use `Export` attribute to register the plugin implementation.
-For example:
+For example, [you could check the code here](/blob/master/test/Rhetos.AspNetFormsAuth.TestApp/Mocks/SendPasswordResetTokenMock.cs):
 
 ```C#
 [Export(typeof(ISendPasswordResetToken))]
@@ -441,7 +353,7 @@ Any other exception (`Rhetos.FrameworkException`, e.g.) will only be logged on t
 **Solution**: The error occurs when the necessary modifications of Web.config file are not done. Please check that you have followed the [installation](#installation) instructions above.
 
 **Issue**: I have accidentally deleted the *admin* user, *SecurityAdministrator* role, or some of its permissions. How can I get it back?<br>
-**Solution**: Execute `AdminSetup.exe` again. It will regenerate the default administration settings. See [admin user](#admin-user).
+**Solution**: Execute `AdminSetup.exe` again. It will regenerate the default administration settings. See [Admin user password](#admin-user-password).
 
 **Other:** In case of a server error, additional information on the error may be found in the Rhetos server log (`RhetosServer.log` file, by default).
 If needed, more verbose logging of the authentication service may be switched on by adding `<logger name="AspNetFormsAuth.AuthenticationService" minLevel="Trace" writeTo="TraceLog" />` in Rhetos server's `web.config`. The trace log will be written to `RhetosServerTrace.log`.
