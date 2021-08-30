@@ -45,7 +45,8 @@ namespace Rhetos.AspNetFormsAuth.TestApp
             // Adding Rhetos to AspNetCore application
             services.AddRhetosHost(ConfigureRhetosHostBuilder)
                 .AddAspNetCoreIdentityUser()
-                .AddAspNetFormsAuth();
+                .AddAspNetFormsAuth()
+                .AddDashboard();
             // Done adding Rhetos
 
             services.AddSwaggerGen(c =>
@@ -79,6 +80,7 @@ namespace Rhetos.AspNetFormsAuth.TestApp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRhetosDashboard();
             });
         }
 
