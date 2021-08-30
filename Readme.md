@@ -14,7 +14,6 @@ Table of contents:
    1. [Authentication](#authentication)
    2. [Common administration activities](#common-administration-activities)
    3. [Forgot password](#forgot-password)
-   4. [Simple administration GUI](#simple-administration-gui)
 2. [Authentication service API](#authentication-service-api)
    1. [Login](#login)
    2. [Logout](#logout)
@@ -25,19 +24,14 @@ Table of contents:
    7. [SendPasswordResetToken](#sendpasswordresettoken)
    8. [ResetPassword](#resetpassword)
 3. [Installation](#installation)
-   1. [1. Modify Web.config](#1-modify-webconfig)
-   2. [2. Configure IIS](#2-configure-iis)
-   3. [3. Configure IIS Express](#3-configure-iis-express)
-   4. [4. Set up HTTPS](#4-set-up-https)
+   1. [Hosting web app on IIS](#hosting-web-app-on-iis)
+   2. [Set up HTTPS](#set-up-https)
 4. [Configuration](#configuration)
-   1. [Set the *admin* user password](#set-the-admin-user-password)
+   1. [Admin user password](#admin-user-password)
    2. [Permissions and claims](#permissions-and-claims)
    3. [Maximum failed password attempts](#maximum-failed-password-attempts)
    4. [Password strength policy](#password-strength-policy)
-   5. [Overriding IIS binding configuration](#overriding-iis-binding-configuration)
 5. [Uninstallation](#uninstallation)
-   1. [Modify Web.config](#modify-webconfig)
-   2. [Configure IIS](#configure-iis)
 6. [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
 7. [Session timeout](#session-timeout)
 8. [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
@@ -168,53 +162,48 @@ Allows a user to set the initial password or reset the forgotten password, using
 
 ## Installation
 
-1. Add package to `.csproj` file:
-
-```xml
-<PackageReference Include="Rhetos.AspNetFormsAuth" Version="5.0.0-dev*" />
-```
+1. Add "Rhetos.AspNetFormsAuth" NuGet package, available at the [NuGet.org](https://www.nuget.org/) on-line gallery.
 
 2. Modify lines in `Startup.cs`, method `ConfigureServices` to:
 
-```cs
-services.AddRhetos(ConfigureRhetosHostBuilder)
-    .AddAspNetFormsAuth();
-```
+   ```cs
+   services.AddRhetos(ConfigureRhetosHostBuilder)
+       .AddAspNetFormsAuth();
+   ```
 
 3. Add to `Startup.cs`, method `Configure` **before** line `app.UseAuthentication()`:
 
-```cs
-app.UseRhetosAspNetFormsAuth();
-```
+   ```cs
+   app.UseRhetosAspNetFormsAuth();
+   ```
 
-* Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
+   * Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
 
-```cs
-services.AddAuthentication(...
-```
+      ```cs
+      services.AddAuthentication(...
+      ```
 
-* If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
+   * If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
 
-```cs
-app.UseSwaggerUI(c =>
-{
-  c.SwaggerEndpoint("/swagger/rhetos/swagger.json", "Rhetos REST API");
-});
-```
+      ```cs
+      app.UseSwaggerUI(c =>
+      {
+        c.SwaggerEndpoint("/swagger/rhetos/swagger.json", "Rhetos REST API");
+      });
+      ```
 
-## IIS Configuration
+### Hosting web app on IIS
+
+If you need to host a Rhetos web app with forms authentication on IIS:
 
 1. You could publish your application by use the feature Publish project in Visual Studio or you also use [dotnet cli to publish](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish) it instead.
-
 2. Install latest [.NET Core module](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/aspnet-core-module) for IIS.
-
 3. Create your web application on [IIS](https://docs.microsoft.com/en-us/iis/configuration/system.applicationhost/sites/site/application/).
+   * Start IIS Manager -> Select the web application -> Open "Authentication" feature, make sure you set this:
+     **enable** *Anonymous Authentication*,
+     **disable** *Windows Authentication*, *Forms Authentication* and every other.
 
-- Start IIS Manager -> Select the web application -> Open "Authentication" feature, make sure you set this:
-**enable** *Anonymous Authentication*,
-   **disable** *Windows Authentication*, *Forms Authentication* and every other.
-
-### 4. Set up HTTPS
+### Set up HTTPS
 
 HTTPS (or any other) secure transport protocol **should always be enforced** when using forms authentication.
 This is necessary because in forms authentication the **user's password** must be submitted from the client securely.
@@ -235,16 +224,16 @@ and give it necessary permissions (claims) for all authentication service method
 
 After deployment:
 
-* Run the Rhetos utility `bin\...\AdminSetup.exe` to initialize the *admin* user's password. The command would like this:
+* Run the Rhetos utility `bin\...\AdminSetup.exe` to initialize the *admin* user's password. Use the following command-line arguments:
 
-```
-AdminSetup.exe <your app dll> --password <your password>
-```
+  ```
+  AdminSetup.exe <your app dll> --password <your password>
+  ```
 
 ### Permissions and claims
 
 All claims related to the authentication service have resource=`AspNetFormsAuth.AuthenticationService`.
-[Admin user](#admin-user) has all the necessary permissions (claims) for all authentication service methods.
+[Admin user](#admin-user-password) has all the necessary permissions (claims) for all authentication service methods.
 
 ### Maximum failed password attempts
 
@@ -307,8 +296,8 @@ If you have multiple Rhetos applications on a single server and do not want to s
 
 ## Session timeout
 
-ASP.NET Identity authentication ticket will expire after 14 days, by default.
-[You could check it here](https://github.com/dotnet/aspnetcore/blob/8b30d862de6c9146f466061d51aa3f1414ee2337/src/Security/Authentication/Cookies/src/CookieAuthenticationOptions.cs#L31).
+Configure the ASP.NET Identity authentication ticket timeout with [CookieAuthenticationOptions.ExpireTimeSpan](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.cookieauthenticationoptions.expiretimespan?view=aspnetcore-1.1#Microsoft_AspNetCore_Builder_CookieAuthenticationOptions_ExpireTimeSpan).
+The default value is [14 days](https://github.com/dotnet/aspnetcore/blob/8b30d862de6c9146f466061d51aa3f1414ee2337/src/Security/Authentication/Cookies/src/CookieAuthenticationOptions.cs#L31).
 
 ## Implementing SendPasswordResetToken
 
@@ -324,7 +313,7 @@ In order to implement a custom method of sending the token to the user (by SMS o
 create a Rhetos plugin package with a class that implements the `Rhetos.AspNetFormsAuth.ISendPasswordResetToken` interface
 from `Rhetos.AspNetFormsAuth.Interfaces.dll`.
 The class must use `Export` attribute to register the plugin implementation.
-For example, [you could check the code here](/blob/master/test/Rhetos.AspNetFormsAuth.TestApp/Mocks/SendPasswordResetTokenMock.cs):
+For example, [you could check the code here](https://github.com/Rhetos/AspNetFormsAuth/blob/master/test/Rhetos.AspNetFormsAuth.TestApp/Mocks/SendPasswordResetTokenMock.cs):
 
 ```C#
 [Export(typeof(ISendPasswordResetToken))]
