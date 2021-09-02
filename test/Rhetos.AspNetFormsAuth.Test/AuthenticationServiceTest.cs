@@ -252,7 +252,7 @@ namespace Rhetos.AspNetFormsAuth.Test
                         Common.Principal p
                     WHERE p.Name like '{RandomNamePrefix}%';");
 
-                serviceScope.ServiceProvider.GetService<IRhetosComponent<IPersistenceTransaction>>().Value.CommitChanges();
+                serviceScope.ServiceProvider.GetService<IRhetosComponent<IUnitOfWork>>().Value.CommitAndClose();
             }
 
             _factory.Dispose();
@@ -279,7 +279,7 @@ namespace Rhetos.AspNetFormsAuth.Test
                         throw new Exception("Failed to add password to user. Errors: " + string.Join(Environment.NewLine, addPasswordResult.Errors.Select(x => x.Description)));
                 }
 
-                serviceScope.ServiceProvider.GetService<IRhetosComponent<IPersistenceTransaction>>().Value.CommitChanges();
+                serviceScope.ServiceProvider.GetService<IRhetosComponent<IUnitOfWork>>().Value.CommitAndClose();
             }
 
             return (randomUserName, password);
@@ -301,7 +301,7 @@ namespace Rhetos.AspNetFormsAuth.Test
                     IsAuthorized = true
                 }) ;
 
-                serviceScope.ServiceProvider.GetService<IRhetosComponent<IPersistenceTransaction>>().Value.CommitChanges();
+                serviceScope.ServiceProvider.GetService<IRhetosComponent<IUnitOfWork>>().Value.CommitAndClose();
             }
             AuthorizationDataCache.ClearCache();
         }

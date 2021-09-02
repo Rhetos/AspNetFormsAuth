@@ -69,7 +69,7 @@ namespace Rhetos.AspNetFormsAuth.Test
 
                 Assert.IsTrue(resetPassowerdResults.Succeeded, "Initalize password failed with errors: " + string.Join(", ", resetPassowerdResults.Errors.Select(x => x.Description)));
 
-                serviceScope.ServiceProvider.GetService<IRhetosComponent<IPersistenceTransaction>>().Value.CommitChanges();
+                serviceScope.ServiceProvider.GetService<IRhetosComponent<IUnitOfWork>>().Value.CommitAndClose();
             }
 
             {

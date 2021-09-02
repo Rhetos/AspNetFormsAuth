@@ -104,7 +104,7 @@ namespace Rhetos.AspNetFormsAuth
             }
             catch (Exception e)
             {
-                persistenceTransaction.Value.DiscardChanges();
+                persistenceTransaction.Value.DiscardOnDispose();
                 return IdentityResult.Failed(new IdentityError { Description = e.Message });
             }
         }

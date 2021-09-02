@@ -102,7 +102,7 @@ namespace AdminSetup
             {
                 scope.ServiceProvider.GetService<IRhetosComponent<AdminUserInitializer>>().Value.Initialize();
                 SetUpAdminAccount(scope.ServiceProvider, password);
-                scope.ServiceProvider.GetService<IRhetosComponent<IPersistenceTransaction>>().Value.CommitChanges();
+                scope.ServiceProvider.GetService<IRhetosComponent<IUnitOfWork>>().Value.CommitAndClose();
             }
         }
 
@@ -162,7 +162,7 @@ namespace AdminSetup
                 }
 
                 if (!elevated)
-                    throw new ApplicationException(System.Diagnostics.Process.GetCurrentProcess().ProcessName + " has to be executed with elevated privileges (as administrator).");
+                    throw new ApplicationException("This process has to be executed with elevated privileges (as administrator).");
             }
         }
 
