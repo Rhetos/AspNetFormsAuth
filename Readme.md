@@ -344,8 +344,10 @@ Any other exception (`Rhetos.FrameworkException`, e.g.) will only be logged on t
 **Issue**: I have accidentally deleted the *admin* user, *SecurityAdministrator* role, or some of its permissions. How can I get it back?<br>
 **Solution**: Execute `AdminSetup.exe` again. It will regenerate the default administration settings. See [Admin user password](#admin-user-password).
 
-**Other:** In case of a server error, additional information on the error may be found in the Rhetos server log (`RhetosServer.log` file, by default).
-If needed, more verbose logging of the authentication service may be switched on by adding `<logger name="AspNetFormsAuth.AuthenticationService" minLevel="Trace" writeTo="TraceLog" />` in Rhetos server's `web.config`. The trace log will be written to `RhetosServerTrace.log`.
+**Other:** In case of a server error, additional information on the error may be found in the Rhetos app's log file (`RhetosServer.log` for Rhetos v1-v4).
+If needed, more verbose logging of the authentication service may be switched on by enabling `Trace` level logger `AspNetFormsAuth.AuthenticationService`.
+For example, in Rhetos v1-v4 add `<logger name="AspNetFormsAuth.AuthenticationService" minLevel="Trace" writeTo="TraceLog" />` in Rhetos application's `web.config`,
+then the trace log will be written to `RhetosServerTrace.log`.
 
 ## Build
 
