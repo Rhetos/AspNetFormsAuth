@@ -17,12 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Rhetos.AspNetFormsAuth;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Rhetos
 {
     public static class RhetosAspNetFormsAuthApplicationBuilderExtensions
     {

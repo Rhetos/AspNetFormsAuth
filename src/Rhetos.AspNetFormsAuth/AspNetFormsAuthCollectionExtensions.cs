@@ -19,12 +19,13 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Rhetos.AspNetFormsAuth;
 using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Rhetos
 {
     public static class AspNetFormsAuthCollectionExtensions
     {
