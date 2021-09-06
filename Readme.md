@@ -153,7 +153,7 @@ Generates a password reset token and sends it to the user.
 
 Allows a user to set the initial password or reset the forgotten password, using the token he received previously.
 
-* Interface: `(string PasswordResetToken, string NewPassword) -> bool`
+* Interface: `(string userName, string PasswordResetToken, string NewPassword) -> bool`
 * See `GeneratePasswordResetToken` method for *PasswordResetToken*.
 * The method does not require user authentication.
 * Response data is boolean *true* if the password change is successful,
@@ -227,7 +227,7 @@ After deployment:
 * Run the Rhetos utility `bin\...\AdminSetup.exe` to initialize the *admin* user's password. Use the following command-line arguments:
 
   ```
-  AdminSetup.exe <your app dll> --password <your password>
+  AdminSetup.exe <your app startup dll> --password <your password> --no-pause
   ```
 
 ### Permissions and claims
@@ -237,16 +237,8 @@ All claims related to the authentication service have resource=`AspNetFormsAuth.
 
 ### Maximum failed password attempts
 
-Use entity *Common.AspNetFormsAuthPasswordAttemptsLimit* (*MaxInvalidPasswordAttempts*, *TimeoutInSeconds*)
-to configure automatic account locking when a number of failed password attempts is reached.
-
-* When *MaxInvalidPasswordAttempts* limit is passed, the user's account is temporarily locked.
-* If *TimeoutInSeconds* is set, user's account will be temporarily locked until the specified time period has passed.
-  If the value is not set or 0, the account will be locked permanently.
-* Administrator may use [`UnlockUser`](#unlockuser) method to unlock the account, or wait for *TimeoutInSeconds*.
-* Multiple limits may be entered. An example with two entries:
-  * After 3 failed attempts, the account is temporarily locked for 120 seconds.
-  * After 10 failed attempts, the account is locked until *admin* unlocks it manually (timeout=0).
+Password attempt limits and lockout time can be customized in
+   the [IdentityOptions.LockoutOptions](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.identityoptions.lockout?view=aspnetcore-5.0#Microsoft_AspNetCore_Identity_IdentityOptions_Lockout)
 
 ### Password strength policy
 
