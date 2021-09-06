@@ -224,11 +224,10 @@ and give it necessary permissions (claims) for all authentication service method
 
 After deployment:
 
-* Run the Rhetos utility `bin\...\AdminSetup.exe` to initialize the *admin* user's password. Use the following command-line arguments:
+* Run the Rhetos utility `AdminSetup.exe` in the app's bin folder, to initialize the *admin* user's password.
+  Run it with command-line argument `AdminSetup.exe <your app startup dll>`, it will prompt to enter the new admin password.
 
-  ```
-  AdminSetup.exe <your app startup dll> --password <your password> --no-pause
-  ```
+If needed, AdminSetup can be automated in a script with command-line arguments `AdminSetup.exe <your app startup dll> --password <your password> --no-pause`
 
 ### Permissions and claims
 
