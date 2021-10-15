@@ -12,7 +12,7 @@
    To configure the token expiration time, set
    the [DataProtectionTokenProviderOptions.TokenLifespan](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.dataprotectiontokenprovideroptions.tokenlifespan?view=aspnetcore-5.0)
    property inside the Startup.ConfigureServices method of your web application.
-4. Removed the option to set the password attempts limit through database.
+4. Removed the option to set the password attempts limit through database (table `Common.AspNetFormsAuthPasswordAttemptsLimit`).
    Password attempt limits and lockout time can be customized in
    the [IdentityOptions.LockoutOptions](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.identityoptions.lockout?view=aspnetcore-5.0#Microsoft_AspNetCore_Identity_IdentityOptions_Lockout)
    class.
