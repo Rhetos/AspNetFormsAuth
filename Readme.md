@@ -177,13 +177,13 @@ Allows a user to set the initial password or reset the forgotten password, using
    app.UseRhetosAspNetFormsAuth();
    ```
 
-   * Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
+  * Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
 
       ```cs
       services.AddAuthentication(...
       ```
 
-   * If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
+  * If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
 
       ```cs
       app.UseSwaggerUI(c =>
@@ -272,19 +272,68 @@ RegularExpression|RuleDescription
 Sharing the authentication cookie is useful when using separate web applications for web pages and application services, or when using multiple servers for load balancing.
 In these scenarios, sharing the forms authentication cookie between the sites will allow a single-point login for the user on any of the sites and seamless use of that cookie on the other sites.
 
-In most cases, for the web applications to share the authentication cookie, it is enough to have the **same** `machineKey` element configuration in the `web.config`.
-For more background info, see [MSDN article: Forms Authentication Across Applications](http://msdn.microsoft.com/en-us/library/eb0zx8fc.aspx).
+You could check official document of Microsoft here [Share authentication cookies among ASP.NET apps](https://docs.microsoft.com/en-us/aspnet/core/security/cookie-sharing).
 
-Steps:
+**Sharing the authentication with ASP.NET MVC (.NET Framework)**
+- In case you have ASP.NET MVC "frontend" apps shared security with Rhetos app, please see this chapter [Share authentication cookies between ASP.NET 4.x and ASP.NET Core apps](https://docs.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-5.0#share-authentication-cookies-between-aspnet-4x-and-aspnet-core-apps). This is the example code how to do it:
 
-1. Generate a new machine key:
-    * Select *Validation method*: HMACSHA256, HMACSHA384, or HMACSHA512 (SHA1, MD5 and 3DES are obsolete).
-    * Select *Encryption method*: AES (DES and 3DES are obsolete).
-    * See [how to](https://www.codeproject.com/Articles/221889/How-to-Generate-Machine-Key-in-IIS).
-2. Copy the machine key values to other web applications in the same deployment environment (using the IIS Manager, or copy the `machineKey` element in *web.config*).
+    ```cs
+    // Rhetos app (.NET Core) config
+    services.AddRhetos(ConfigureRhetosHostBuilder)
+       .AddAspNetFormsAuth();
 
-For security reasons, it is important to generate the new validationKey and decryptionKey **for each deployment environment**.
-If you have multiple Rhetos applications on a single server and do not want to share the authentication between them, make sure to generate different machine keys.
+    ...
+
+    services.PostConfigureAll<CookieAuthenticationOptions>(options =>
+    {
+        options.Cookie.Name = ".AspNet.SharedCookie";
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Path = "/";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
+        options.CookieManager = new ChunkingCookieManager();
+        options.TicketDataFormat = new SecureDataFormat<AuthenticationTicket>(
+            new TicketSerializer(),
+            DataProtectionProvider.Create(
+                new DirectoryInfo("C:\\keyring"),
+                (builder) => { builder.SetApplicationName("iis-app-name"); }
+            ).CreateProtector(
+                "Microsoft.AspNetCore.Authentication.Cookies." +
+                "CookieAuthenticationMiddleware",
+                "Cookies.Application",
+                "v2"
+            )
+        );
+    });
+    ```
+
+    ```cs
+    // ASP.NET MVC (.NET Framework) config
+    app.UseCookieAuthentication(new CookieAuthenticationOptions()
+    {
+        AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+        CookieName = ".AspNet.SharedCookie",
+        SlidingExpiration = true,
+        ExpireTimeSpan = TimeSpan.FromMinutes(120),
+        LoginPath = PathString.FromUriComponent("/Account/Login"),
+        LogoutPath = PathString.FromUriComponent("/Account/LogOff"),
+        CookieManager = new ChunkingCookieManager(),
+        TicketDataFormat = new AspNetTicketDataFormat(
+            new DataProtectorShim(
+                DataProtectionProvider.Create(
+                    new DirectoryInfo("C:\\keyring"),
+                    (builder) => { builder.SetApplicationName("iis-app-name"); }
+                ).CreateProtector(
+                    "Microsoft.AspNetCore.Authentication.Cookies." +
+                    "CookieAuthenticationMiddleware",
+                    "Cookies.Application",
+                    "v2"
+                )
+            )
+        )
+    });
+    ```
 
 ## Session timeout
 
