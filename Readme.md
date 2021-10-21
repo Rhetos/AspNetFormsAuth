@@ -31,13 +31,12 @@ Table of contents:
    2. [Permissions and claims](#permissions-and-claims)
    3. [Maximum failed password attempts](#maximum-failed-password-attempts)
    4. [Password strength policy](#password-strength-policy)
-5. [Uninstallation](#uninstallation)
-6. [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
-7. [Session timeout](#session-timeout)
-8. [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
+5. [Sharing the authentication across web applications](#sharing-the-authentication-across-web-applications)
+6. [Session timeout](#session-timeout)
+7. [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
    1. [Custom implementation](#custom-implementation)
-9. [Troubleshooting](#troubleshooting)
-10. [Build](#build)
+8. [Troubleshooting](#troubleshooting)
+9. [Build](#build)
 
 ## Features
 
@@ -177,20 +176,22 @@ Allows a user to set the initial password or reset the forgotten password, using
    app.UseRhetosAspNetFormsAuth();
    ```
 
-  * Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
+Additional remarks:
 
-      ```cs
-      services.AddAuthentication(...
-      ```
+* Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
 
-  * If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
+  ```cs
+  services.AddAuthentication(...
+  ```
 
-      ```cs
-      app.UseSwaggerUI(c =>
-      {
-        c.SwaggerEndpoint("/swagger/rhetos/swagger.json", "Rhetos REST API");
-      });
-      ```
+* If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
+
+  ```cs
+  app.UseSwaggerUI(c =>
+  {
+    c.SwaggerEndpoint("/swagger/rhetos/swagger.json", "Rhetos REST API");
+  });
+  ```
 
 ### Hosting web app on IIS
 
@@ -258,14 +259,6 @@ RegularExpression|RuleDescription
 `[A-Z]`          | The password must contain at least one uppercase letters.
 `\W`             | The password must contain at least one special character (not a letter or a digit).
 
-## Uninstallation
-
-1. Remove package Rhetos.AspNetFormsAuth from your project (`.csproj` file).
-
-2. Remove `.AddAspNetFormsAuth` line in `Startup.cs`, method `ConfigureServices`.
-
-3. Remove `app.UseRhetosAspNetFormsAuth()` line in `Startup.cs`, method `Configure`.
-
 ## Sharing the authentication across web applications
 
 Sharing the authentication cookie is useful when using separate web applications for web pages and application services, or when using multiple servers for load balancing.
@@ -274,7 +267,11 @@ In these scenarios, sharing the forms authentication cookie between the sites wi
 You could check official document of Microsoft here [Share authentication cookies among ASP.NET apps](https://docs.microsoft.com/en-us/aspnet/core/security/cookie-sharing).
 
 **Sharing the authentication with ASP.NET MVC (.NET Framework)**
-- In case you have ASP.NET MVC "frontend" apps shared security with Rhetos app, please see this chapter [Share authentication cookies between ASP.NET 4.x and ASP.NET Core apps](https://docs.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-5.0#share-authentication-cookies-between-aspnet-4x-and-aspnet-core-apps). This is the example code how to do it:
+
+- In case you have ASP.NET MVC "frontend" apps shared security with Rhetos app,
+  that [uses Katana](https://docs.microsoft.com/en-us/aspnet/aspnet/overview/owin-and-katana/getting-started-with-owin-and-katana),
+  please see this chapter [Share authentication cookies between ASP.NET 4.x and ASP.NET Core apps](https://docs.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-5.0#share-authentication-cookies-between-aspnet-4x-and-aspnet-core-apps).
+  This is the example code how to do it:
 
     ```cs
     // Rhetos app (.NET Core) config
