@@ -254,15 +254,12 @@ namespace Rhetos.AspNetFormsAuth
 
         bool DoesUserExists(string userName)
         {
-            string sql = string.Format(DoesUserExistsSql, SqlUtility.QuoteText(userName));
             bool exists = false;
-            _sqlExecuter.Value.ExecuteReader(sql, reader => exists = true);
+            _sqlExecuter.Value.ExecuteReaderInterpolated(
+                $"SELECT TOP 1 1 FROM Common.Principal cp WHERE cp.Name = {userName}",
+                reader => exists = true);
             return exists;
         }
-
-        const string DoesUserExistsSql =
-            @"SELECT TOP 1 1 FROM Common.Principal cp
-            WHERE cp.Name = {0}";
 
         private void ValidateNonEmptyString(string value, string fieldName)
         {
