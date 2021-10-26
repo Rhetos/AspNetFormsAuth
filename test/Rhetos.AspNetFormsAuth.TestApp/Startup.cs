@@ -65,8 +65,8 @@ namespace Rhetos.AspNetFormsAuth.TestApp
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Rhetos.AspNetFormsAuth.TestApp v1");
                 c.SwaggerEndpoint("/swagger/rhetos/swagger.json", "Rhetos REST API");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Rhetos.AspNetFormsAuth.TestApp v1");
             });
 
             app.UseRouting();

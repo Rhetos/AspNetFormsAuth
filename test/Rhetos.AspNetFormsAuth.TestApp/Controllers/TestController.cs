@@ -19,20 +19,36 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rhetos.Utilities;
+using System;
 using System.Threading.Tasks;
 
 namespace Rhetos.AspNetFormsAuth.TestApp.Controllers
 {
     [ApiController]
-    [ApiExplorerSettings(GroupName = "v1")]
+    [ApiExplorerSettings(GroupName = "rhetos")]
     public class TestController : ControllerBase
     {
+        private readonly IRhetosComponent<IUserInfo> _userInfo;
+
+        public TestController(IRhetosComponent<IUserInfo> userInfo)
+        {
+            _userInfo = userInfo;
+        }
+
         [HttpGet]
         [Authorize]
         [Route("Test/GetTest")]
-        public Task<string> GetTest()
+        public string GetTest()
         {
-            return Task.FromResult("test");
+            return "test";
+        }
+
+        [HttpGet]
+        [Route("Test/GetUserInfo")]
+        public string GetUserInfo()
+        {
+            return _userInfo.Value.Report();
         }
     }
 }

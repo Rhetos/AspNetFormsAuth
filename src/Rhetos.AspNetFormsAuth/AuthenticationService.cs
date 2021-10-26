@@ -151,12 +151,27 @@ namespace Rhetos.AspNetFormsAuth
             else
                 CheckPasswordStrength(password);
 
+            var user = await GetUserOrErrorForAdmin(userName, nameof(SetPasswordAsync));
             await SafeExecuteAsync(
                 async () => {
-                    var user = await _userManager.FindByNameAsync(userName);
                     var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                     return await _userManager.ResetPasswordAsync(user, token, password);
                 }, "Set password", userName);
+        }
+
+        /// <summary>
+        /// Operations that are intended for admin uses can have some information returned in the error response.
+        /// Operations intended for other users should not call this method for security reasons.
+        /// </summary>
+        private async Task<IdentityUser<Guid>> GetUserOrErrorForAdmin(string userName, string operation)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user is null)
+            {
+                _logger.Info($"Cannot find user '{userName}' for {operation}.");
+                throw new UserException($"Cannot find the specified user.");
+            }
+            return user;
         }
 
         public async Task<bool> ChangeMyPasswordAsync(string userName, string oldPassword, string newPassword)
@@ -195,10 +210,10 @@ namespace Rhetos.AspNetFormsAuth
             ValidateNonEmptyString(userName, nameof(userName));
             CheckPermissions(AuthenticationServiceClaims.UnlockUserClaim);
 
+            var user = await GetUserOrErrorForAdmin(userName, nameof(UnlockUserAsync));
             await SafeExecuteAsync(
                 async () =>
                 {
-                    var user = await _userManager.FindByNameAsync(userName);
                     return await _userManager.SetLockoutEndDateAsync(user, new DateTimeOffset(DateTime.UtcNow));
                 }, "Unlock user", userName);
         }
@@ -208,15 +223,11 @@ namespace Rhetos.AspNetFormsAuth
             _logger.Trace(() => "GeneratePasswordResetToken: " + userName);
             CheckPermissions(AuthenticationServiceClaims.GeneratePasswordResetTokenClaim);
             ValidateNonEmptyString(userName, nameof(userName));
-            return await GeneratePasswordResetTokenInternalAsync(userName);
-        }
 
-        private async Task<string> GeneratePasswordResetTokenInternalAsync(string userName)
-        {
             if (!DoesUserExists(userName)) // Providing this information is not a security issue, because this method requires admin credentials (GeneratePasswordResetTokenClaim).
                 throw new UserException("User '{0}' is not registered.", new[] { userName }, null, null);
 
-            var user = await _userManager.FindByNameAsync(userName);
+            var user = await GetUserOrErrorForAdmin(userName, nameof(GeneratePasswordResetTokenAsync));
             return await _userManager.GeneratePasswordResetTokenAsync(user);
         }
 
@@ -229,22 +240,24 @@ namespace Rhetos.AspNetFormsAuth
             try
             {
                 var user = await _userManager.FindByNameAsync(userName);
+                if (user == null)
+                {
+                    _logger.Info($"Cannot find user '{userName}' for {nameof(SendPasswordResetTokenAsync)}.");
+                    return;
+                }
                 var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
                 // The plugin may choose it's own client error messages (UserException and ClientException will not be suppressed).
                 _sendPasswordResetTokenPlugin.Value.SendPasswordResetToken(userName, additionalClientInfo, passwordResetToken);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not UserException and not ClientException)
             {
-                if (ex is UserException || ex is ClientException)
-                    ExceptionsUtility.Rethrow(ex);
-
                 // Don't return an internal error to the client. Log it and return a generic error message:
                 _logger.Error(logErrorFormat, userName, ex);
                 throw new FrameworkException(ErrorReporting.GetInternalServerErrorMessage(_localizer, ex));
             }
         }
 
-        public async Task<bool> ResetPasswordAsync(string userName,string newPassword, string resetPasswordToken)
+        public async Task<bool> ResetPasswordAsync(string userName, string newPassword, string resetPasswordToken)
         {
             _logger.Trace("ResetPassword");
 
