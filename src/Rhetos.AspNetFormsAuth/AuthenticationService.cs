@@ -264,7 +264,7 @@ namespace Rhetos.AspNetFormsAuth
 
             if (successfulReset && user != null)
                 await SafeExecuteAsync( // Login does not need to be successful for this function to return true.
-                    async () => { await _signInManager.SignInAsync(user, false); },
+                    async () => { await LogInAsync(userName, newPassword, false); },
                     "Login after ResetPassword", userName);
 
             return successfulReset;
