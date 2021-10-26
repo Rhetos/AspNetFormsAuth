@@ -17,6 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Rhetos.Dom.DefaultConcepts;
 using Rhetos.Logging;
@@ -45,6 +47,8 @@ namespace Rhetos.AspNetFormsAuth
         private readonly IRhetosComponent<IUserInfo> _userInfo;
         private readonly SignInManager<IdentityUser<Guid>> _signInManager;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
+        private readonly IAuthenticationSchemeProvider _schemes;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthenticationService(
             IRhetosComponent<IUserInfo> userInfo,
@@ -55,7 +59,9 @@ namespace Rhetos.AspNetFormsAuth
             IRhetosComponent<Lazy<IEnumerable<ISendPasswordResetToken>>> sendPasswordResetTokenPlugins,
             IRhetosComponent<ILocalizer> localizer,
             SignInManager<IdentityUser<Guid>> signInManager,
-            UserManager<IdentityUser<Guid>> userManager)
+            UserManager<IdentityUser<Guid>> userManager,
+            IAuthenticationSchemeProvider schemes,
+            IHttpContextAccessor httpContextAccessor)
         {
             _logger = logProvider.Value.GetLogger("AspNetFormsAuth.AuthenticationService");
             _authorizationManager = authorizationManager.Value;
@@ -64,7 +70,8 @@ namespace Rhetos.AspNetFormsAuth
             _userInfo = userInfo;
             _signInManager = signInManager;
             _userManager = userManager;
-
+            _schemes = schemes;
+            _httpContextAccessor = httpContextAccessor;
             _passwordStrengthRules = new Lazy<IEnumerable<IPasswordStrength>>(() => repositories.Value.Load<IPasswordStrength>());
 
             _localizer = localizer.Value;
@@ -114,9 +121,20 @@ namespace Rhetos.AspNetFormsAuth
             _logger.Trace(() => $"LogOut");
 
             await SafeExecuteAsync(
-                async () => await _signInManager.SignOutAsync(),
+                async () =>
+                {
+                    // Using HttpContext.SignOutAsync instead of _signInManager.SignOutAsync(), because SignInManager
+                    // tries to sign out from three schemes, see https://github.com/dotnet/aspnetcore/blob/5ace0efa495c1faa61c8138699f31a830c676ca5/src/Identity/Core/src/SignInManager.cs#L246-L251
+                    // but this plugin registers only one, see AddAspNetFormsAuth method.
+                    // To avoid SignOutAsync exception InvalidOperationException: "No sign-out authentication handler is registered for the scheme 'Identity.External'."
+                    // this code finds registered schemes and signs out for them.
+                    // This might help with any further customizations of authentications cookies by app developers.
+                    // For more context see discussion at https://stackoverflow.com/a/56747333/2086516
+                    var schemes = await _schemes.GetAllSchemesAsync();
+                    foreach (var scheme in schemes)
+                        await _httpContextAccessor.HttpContext.SignOutAsync(scheme.Name);
+                },
                 "Logout", "");
-            ;
         }
 
         public async Task SetPasswordAsync(string userName, string password, bool ignorePasswordStrengthPolicy)
@@ -316,7 +334,8 @@ namespace Rhetos.AspNetFormsAuth
             }
             catch (Exception ex)
             {
-                _logger.Info(() => actionName + " failed: " + context + ", " + ex);
+                string contextSeparator = !string.IsNullOrEmpty(context) ? ", " : "";
+                _logger.Info(() => actionName + " failed: " + context + contextSeparator + ex);
                 return false;
             }
         }

@@ -41,6 +41,8 @@ namespace Rhetos
                 builder.Services.Configure(configureOptions);
             }
 
+            // Using AddIdentityCore instead of AddIdentity to minimize impact to authentication setup,
+            // and allow further customizations by app developers.
             builder.Services.AddIdentityCore<IdentityUser<Guid>>(options =>
                 {
                     options.Password.RequireDigit = false;
