@@ -31,8 +31,9 @@
   </metadata>
   <files>
     <file src="Readme.md" target="" />
-    <file src="src\DataMigration\**\*" target="DataMigration" />
-    <file src="src\DslScripts\**\*" target="DslScripts" />
+    <file src="ChangeLog.md" target="" />
+    <file src="src\Rhetos.AspNetFormsAuth\DataMigration\**\*" target="DataMigration" />
+    <file src="src\Rhetos.AspNetFormsAuth\DslScripts\**\*" target="DslScripts" />
     <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.dll" target="lib\net5.0" />
     <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.pdb" target="lib\net5.0" />
 
