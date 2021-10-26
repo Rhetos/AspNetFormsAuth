@@ -242,10 +242,11 @@ Password attempt limits and lockout time can be customized in
 
 ### Password strength policy
 
-Use entity *Common.AspNetFormsAuthPasswordStrength* (*RegularExpression*, *RuleDescription*) to configure the policy.
+Use entity (database table) *Common.AspNetFormsAuthPasswordStrength* to configure the password strength policy
+with one or more regular expressions.
 
-* A new password must pass all the rules in *Common.AspNetFormsAuthPasswordStrength*.
-* *RuleDescription* is uses as an error message to the user if the new password breaks the policy.
+* A new password must pass all rules entered in the table.
+* *RuleDescription* is used as an error message to the user if the new password breaks the policy.
 * When administrator executes [`SetPassword`](#setpassword) method, the property *IgnorePasswordStrengthPolicy*
   may be used to avoid the policy.
 
@@ -256,7 +257,8 @@ RegularExpression|RuleDescription
 `.{6,}`          | The password length must be at least six characters.
 `\d`             | The password must contain at least one digit.
 `(\d.*){3,}`     | The password must contain at least three digits.
-`[A-Z]`          | The password must contain at least one uppercase letters.
+`[A-Z]`          | The password must contain at least one uppercase letter.
+`[a-z]`          | The password must contain at least one lowercase letter.
 `\W`             | The password must contain at least one special character (not a letter or a digit).
 
 ## Sharing the authentication across web applications
