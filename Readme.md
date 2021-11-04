@@ -1,12 +1,17 @@
 # AspNetFormsAuth
 
 AspNetFormsAuth is a plugin package for [Rhetos development platform](https://github.com/Rhetos/Rhetos).
-It provides an implementation of **ASP.NET Core Identity authentication** to Rhetos server applications.
-
-The authentication is implemented using Microsoft's *WebMatrix SimpleMembershipProvider*,
+It provides an implementation of ASP.NET Core Identity authentication to Rhetos applications,
 with recommended security best practices such as password salting and hashing.
-Implementation fully depends on SimpleMembershipProvider; AspNetFormsAuth project does not try
-to implement its own authentication or security mechanisms.
+
+This is a **backward-compatibility** plugin for Rhetos applications that are migrated
+from ASP.NET to ASP.NET Core on .NET 5 (Rhetos v5).
+It provides the same authentication web API and database storage of users.
+Since Rhetos v5, there is technically no need for such plugins:
+Authentication is managed by ASP.NET Core, so Rhetos does not need to handle user authentication.
+
+For documentation on older versions of this plugin, see previous release branch
+[Readme.md](https://github.com/Rhetos/AspNetFormsAuth/blob/rhetos-4/Readme.md).
 
 Table of contents:
 
@@ -375,7 +380,7 @@ Any other exception (`Rhetos.FrameworkException`, e.g.) will only be logged on t
 ## Troubleshooting
 
 **Issue**: Deployment results with error message "DslSyntaxException: Concept with same key is described twice with different values."<br>
-**Solution**: Please check if you have deployed both *SimpleWindowsAuth* package and *AspNetFormsAuth* package at the same time. Only one of the packages can be deployed on Rhetos server. Read the [installation](#installation) instructions above for more information on the issue.
+**Solution**: Please check if you have deployed both *SimpleWindowsAuth* package and *AspNetFormsAuth* package at the same time. Only one of the packages can be added to a Rhetos app. Read the [installation](#installation) instructions above for more information on the issue.
 
 **Issue**: Web service responds with error message "The Role Manager feature has not been enabled."<br>
 **Solution**: The error occurs when the necessary modifications of Web.config file are not done. Please check that you have followed the [installation](#installation) instructions above.
