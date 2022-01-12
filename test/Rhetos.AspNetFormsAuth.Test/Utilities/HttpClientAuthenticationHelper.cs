@@ -95,14 +95,14 @@ namespace Rhetos.AspNetFormsAuth.Test
 
             if (results.StatusCode == HttpStatusCode.OK)
             {
-                return ValueOrError<TResponse>.CreateValue(parseResponse(responseContent));
+                return ValueOrError.CreateValue(parseResponse(responseContent));
             }
             else if (results.StatusCode == HttpStatusCode.BadRequest || results.StatusCode == HttpStatusCode.Unauthorized)
             {
                 string errorMessage = "";
                 if (results.StatusCode == HttpStatusCode.BadRequest)
                     errorMessage = JsonSerializer.Deserialize<RhetosErrorResponse>(responseContent).UserMessage;
-                return ValueOrError<TResponse>.CreateError($"({(int)results.StatusCode}) {errorMessage}");
+                return ValueOrError.CreateError($"({(int)results.StatusCode}) {errorMessage}");
             }
             else
                 throw new Exception("Response from server: " + responseContent);
