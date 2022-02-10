@@ -65,5 +65,6 @@ namespace Rhetos.AspNetFormsAuth
 
     public class DummyCommandInfo : ICommandInfo
     {
+        public string Summary() => GetType().Name;
     }
 }
