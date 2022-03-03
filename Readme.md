@@ -77,7 +77,7 @@ There are two recommended ways of implementing *forgot password* functionality w
 
 ## Authentication service API
 
-The JSON service is available at URI `<rhetos server>/Resources/AspNetFormsAuth/Authentication`, with the following methods.
+The JSON service is available at URI `<base URL>/Resources/AspNetFormsAuth/Authentication`, with the following methods.
 
 ### Login
 
@@ -215,10 +215,8 @@ HTTPS (or any other) secure transport protocol **should always be enforced** whe
 This is necessary because in forms authentication the **user's password** must be submitted from the client securely.
 At least the services inside `/Resources/AspNetFormsAuth` path must use HTTPS.
 
-To enable HTTPS, follow the instructions in [Setting up Rhetos for HTTPS](https://github.com/Rhetos/Rhetos/wiki/Setting-up-Rhetos-for-HTTPS).
-
-Consider using a [free SSL certificate](https://www.google.hr/search?q=free+SSL+certificate)
-in development or QA environment.
+To enable HTTPS, see [Configuring HTTPS in ASP.NET Core](https://devblogs.microsoft.com/dotnet/configuring-https-in-asp-net-core-across-different-platforms/)
+and [Enforce HTTPS in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-6.0&tabs=visual-studio).
 
 ## Configuration
 
