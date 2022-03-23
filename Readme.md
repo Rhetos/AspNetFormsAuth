@@ -28,7 +28,7 @@ Table of contents:
    6. [GeneratePasswordResetToken](#generatepasswordresettoken)
    7. [SendPasswordResetToken](#sendpasswordresettoken)
    8. [ResetPassword](#resetpassword)
-3. [Installation](#installation)
+3. [Installation and configuration](#installation-and-configuration)
    1. [Hosting web app on IIS](#hosting-web-app-on-iis)
    2. [Set up HTTPS](#set-up-https)
 4. [Configuration](#configuration)
@@ -41,7 +41,8 @@ Table of contents:
 7. [Implementing SendPasswordResetToken](#implementing-sendpasswordresettoken)
    1. [Custom implementation](#custom-implementation)
 8. [Troubleshooting](#troubleshooting)
-9. [Build](#build)
+9. [How to contribute](#how-to-contribute)
+   1. [Building and testing the source code](#building-and-testing-the-source-code)
 
 ## Features
 
@@ -164,7 +165,7 @@ Allows a user to set the initial password or reset the forgotten password, using
   *false* if the token is invalid or expired,
   or an error message (string) with HTTP error code 4* or 5* in case of any other error.
 
-## Installation
+## Installation and configuration
 
 1. Add "Rhetos.AspNetFormsAuth" NuGet package, available at the [NuGet.org](https://www.nuget.org/) on-line gallery.
 
@@ -391,11 +392,19 @@ If needed, more verbose logging of the authentication service may be switched on
 For example, in Rhetos v1-v4 add `<logger name="AspNetFormsAuth.AuthenticationService" minLevel="Trace" writeTo="TraceLog" />` in Rhetos application's `web.config`,
 then the trace log will be written to `RhetosServerTrace.log`.
 
-## Build
+## How to contribute
 
-**Note:** This package is already available at the [NuGet.org](https://www.nuget.org/) online gallery.
-You don't need to build it from source in order to use it in your application.
+Contributions are very welcome. The easiest way is to fork this repo, and then
+make a pull request from your fork. The first time you make a pull request, you
+may be asked to sign a Contributor Agreement.
+For more info see [How to Contribute](https://github.com/Rhetos/Rhetos/wiki/How-to-Contribute) on Rhetos wiki.
 
-To build the package from source, run `Build.bat`.
-The script will pause in case of an error.
-The build output is a NuGet package in the "Install" subfolder.
+### Building and testing the source code
+
+* Note: This package is already available at the [NuGet.org](https://www.nuget.org/) online gallery.
+  You don't need to build it from source in order to use it in your application.
+* To build the package from source, run `Clean.bat`, `Build.bat` and `Test.bat`.
+* For the test script to work, you need to create an empty database and
+  a settings file `test\Rhetos.AspNetFormsAuth.TestApp\rhetos-app.local.settings.json`
+  with the database connection string (configuration key "ConnectionStrings:RhetosConnectionString").
+* The build output is a NuGet package in the "Install" subfolder.
