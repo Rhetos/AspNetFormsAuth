@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rhetos" Version="5.0.0-dev*" />
-    <PackageReference Include="Rhetos.CommonConcepts" Version="5.0.0-dev*" />
+    <PackageReference Include="Rhetos" Version="5.0.0" />
+    <PackageReference Include="Rhetos.CommonConcepts" Version="5.0.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
   </ItemGroup>
 
