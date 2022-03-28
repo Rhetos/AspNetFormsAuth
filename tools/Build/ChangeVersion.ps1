@@ -17,8 +17,8 @@ Else
 function RegexReplace ($fileSearch, $replacePattern, $replaceWith)
 {
     gci $fileSearch -r | % {
-        $c = [IO.File]::ReadAllText($_.FullName, [System.Text.Encoding]::Default) -Replace $replacePattern, $replaceWith;
-        [IO.File]::WriteAllText($_.FullName, $c, [System.Text.Encoding]::UTF8)
+        $c = [IO.File]::ReadAllText($_.FullName) -Replace $replacePattern, $replaceWith;
+        [IO.File]::WriteAllText($_.FullName, $c)
     }
 }
 
