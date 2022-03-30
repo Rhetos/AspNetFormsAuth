@@ -176,19 +176,21 @@ Allows a user to set the initial password or reset the forgotten password, using
        .AddAspNetFormsAuth();
    ```
 
-3. Add to `Startup.cs`, method `Configure` **before** line `app.UseAuthentication()`:
+3. Add the following lines to `Startup.cs`, method `Configure`. Check if some are already there to avoid duplicates. The ordering is important.
 
    ```cs
    app.UseRhetosAspNetFormsAuth();
+   app.UseAuthentication();
+   app.UseAuthorization();
+   ```
+
+4. Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
+
+   ```cs
+   services.AddAuthentication(...
    ```
 
 Additional remarks:
-
-* Make sure that you **don't** have this lines in `Startup.cs`, method `Configure`:
-
-  ```cs
-  services.AddAuthentication(...
-  ```
 
 * If you want to show authentication APIs in Swagger, add this line in `Startup.cs`, method `Configure`:
 
