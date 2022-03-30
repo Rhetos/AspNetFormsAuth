@@ -18,7 +18,6 @@
 */
 
 using Rhetos.Logging;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -33,7 +32,7 @@ namespace AdminSetup
             string executable,
             string hostFilePath,
             IReadOnlyList<string> baseArgs,
-            ILogger logger = null)
+            ILogger logger)
         {
             var newArgs = new List<string>();
             newArgs.Add("exec");
@@ -41,7 +40,7 @@ namespace AdminSetup
             var runtimeConfigPath = Path.ChangeExtension(hostFilePath, "runtimeconfig.json");
             if (!File.Exists(runtimeConfigPath))
             {
-                logger?.Error($"Missing {runtimeConfigPath} file required to run the AdminSetup program.");
+                logger.Error($"Missing {runtimeConfigPath} file required to run the AdminSetup program.");
                 return 1;
             }
 
@@ -56,19 +55,20 @@ namespace AdminSetup
             }
             else
             {
-                logger?.Warning($"The file {depsFile} was not found. This can cause a 'DllNotFoundException' during the program execution.");
+                logger.Warning($"The file {depsFile} was not found. This can cause a 'DllNotFoundException' during the program execution.");
             }
 
             newArgs.Add(executable);
             newArgs.AddRange(baseArgs);
 
-            logger?.Trace(() => "dotnet args: " + string.Join(", ", newArgs.Select(arg => "\"" + (arg ?? "null") + "\"")));
-            return Exe.Run("dotnet", newArgs);
+            logger.Trace(() => "dotnet args: " + string.Join(", ", newArgs.Select(arg => "\"" + (arg ?? "null") + "\"")));
+            return Exe.Run("dotnet", newArgs, logger);
         }
 
         public static int Run(
             string executable,
-            IReadOnlyList<string> args)
+            IReadOnlyList<string> args,
+            ILogger logger)
         {
             var arguments = ToArguments(args);
 
@@ -81,6 +81,7 @@ namespace AdminSetup
             int processErrorCode;
             using (var process = Process.Start(start))
             {
+                logger.Info(() => $"Started '{Path.GetFileName(executable)}' process {process.Id}.");
                 process.WaitForExit();
                 processErrorCode = process.ExitCode;
             }
@@ -95,17 +96,17 @@ namespace AdminSetup
             {
                 if (i != 0)
                 {
-                    builder.Append(" ");
+                    builder.Append(' ');
                 }
 
-                if (args[i].IndexOf(' ') == -1)
+                if (!args[i].Contains(' '))
                 {
                     builder.Append(args[i]);
 
                     continue;
                 }
 
-                builder.Append("\"");
+                builder.Append('"');
 
                 var pendingBackslashes = 0;
                 for (var j = 0; j < args[i].Length; j++)
@@ -131,7 +132,7 @@ namespace AdminSetup
                             {
                                 if (pendingBackslashes == 1)
                                 {
-                                    builder.Append("\\");
+                                    builder.Append('\\');
                                 }
                                 else
                                 {
@@ -151,7 +152,7 @@ namespace AdminSetup
                     builder.Append('\\', pendingBackslashes * 2);
                 }
 
-                builder.Append("\"");
+                builder.Append('"');
             }
 
             return builder.ToString();
