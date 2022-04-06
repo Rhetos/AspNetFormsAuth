@@ -73,6 +73,11 @@ namespace AdminSetup
             return rootCommand.Invoke(args);
         }
 
+        /// <summary>
+		/// Executing the current CLI utility in the context of the host application, involving the host app's dependencies,
+		/// .NET version and runtime framework.
+		/// This is need for the utility to be able to use the provided application's object model without issues with missing dependency libraries.
+		/// </summary>
         private static int InvokeAsExternalProcess(string rhetosHostDllPath, string[] baseArgs)
         {
             var newArgs = new List<string>(baseArgs);
