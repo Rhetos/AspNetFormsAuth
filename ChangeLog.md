@@ -1,5 +1,9 @@
 # Rhetos.AspNetFormsAuth release notes
 
+## 5.1.0 (2022-04-08)
+
+* .NET 6 support for CLI utility AdminSetup.exe.
+
 ## 5.0.0 (2022-03-25)
 
 ### Breaking changes
