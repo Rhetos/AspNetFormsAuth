@@ -1,0 +1,5 @@
+<Project>
+    <ItemGroup>
+        <None Update="/**/rhetos.aspnetformsauth/**/contentFiles/**/RhetosTools/*" Visible="False" />
+    </ItemGroup>
+</Project>

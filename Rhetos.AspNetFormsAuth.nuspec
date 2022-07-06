@@ -22,24 +22,28 @@
       </group>
     </frameworkReferences>
     <contentFiles>
-      <files include="any/any/AdminSetup.exe" buildAction="None" copyToOutput="true" />
-      <files include="any/any/AdminSetup.dll" buildAction="None" copyToOutput="true" />
-      <files include="any/any/AdminSetup.pdb" buildAction="None" copyToOutput="true" />
-      <files include="any/any/AdminSetup.runtimeconfig.json" buildAction="None" copyToOutput="true" />
+      <files include="any/any/RhetosTools/AdminSetup.exe" buildAction="None" copyToOutput="true" flatten="true" />
+      <files include="any/any/RhetosTools/AdminSetup.dll" buildAction="None" copyToOutput="true" flatten="true" />
+      <files include="any/any/RhetosTools/AdminSetup.pdb" buildAction="None" copyToOutput="true" flatten="true" />
+      <files include="any/any/RhetosTools/AdminSetup.runtimeconfig.json" buildAction="None" copyToOutput="true" flatten="true" />
     </contentFiles>
   </metadata>
   <files>
     <file src="Readme.md" target="" />
     <file src="ChangeLog.md" target="" />
+
+    <file src="src\Rhetos.AspNetFormsAuth.props" target="build" />
+
     <file src="src\Rhetos.AspNetFormsAuth\DataMigration\**\*" target="DataMigration" />
     <file src="src\Rhetos.AspNetFormsAuth\DslScripts\**\*" target="DslScripts" />
+
     <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.dll" target="lib\net5.0" />
     <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.pdb" target="lib\net5.0" />
 
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.exe" target="contentFiles/any/any" />
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.dll" target="contentFiles/any/any" />
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.pdb" target="contentFiles/any/any" />
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.runtimeconfig.json" target="contentFiles/any/any" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.exe" target="contentFiles/any/any/RhetosTools" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.dll" target="contentFiles/any/any/RhetosTools" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.pdb" target="contentFiles/any/any/RhetosTools" />
+    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.runtimeconfig.json" target="contentFiles/any/any/RhetosTools" />
     <!-- When invoking AdminSetup.exe, dotnet will search for some dlls (System.Diagnostics.PerformanceCounter.dll) in the output folder
     because the DLL is specified in the AdminSetup.deps.json file
     but an ASP.NET project will not have it because this DLL is located in Microsoft.AspNetCore.App runtime folder and will throw an error.
