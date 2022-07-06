@@ -1,5 +1,9 @@
 # Rhetos.AspNetFormsAuth release notes
 
+## 5.2.0 (2022-07-06)
+
+* Runtime assets (AdminSetup.exe and other files) hidden in Visual Studio Solution Explorer to reduce clutter.
+
 ## 5.1.0 (2022-04-08)
 
 * .NET 6 support for CLI utility AdminSetup.exe.
