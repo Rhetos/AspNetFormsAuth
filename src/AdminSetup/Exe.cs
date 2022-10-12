@@ -40,7 +40,7 @@ namespace AdminSetup
             var runtimeConfigPath = Path.ChangeExtension(hostFilePath, "runtimeconfig.json");
             if (!File.Exists(runtimeConfigPath))
             {
-                logger.Error($"Missing {runtimeConfigPath} file required to run the AdminSetup program.");
+                logger.Error($"Missing {runtimeConfigPath} file required to run '{Path.GetFileName(executable)}'.");
                 return 1;
             }
 
