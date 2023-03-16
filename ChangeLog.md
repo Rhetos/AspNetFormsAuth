@@ -1,5 +1,9 @@
 # Rhetos.AspNetFormsAuth release notes
 
+## 5.3.0 (2023-03-16)
+
+* Bugfix: In some cases AdminSetup.exe did could write to the application log file.
+
 ## 5.2.0 (2022-07-06)
 
 * Runtime assets (AdminSetup.exe and other files) hidden in Visual Studio Solution Explorer to reduce clutter.
