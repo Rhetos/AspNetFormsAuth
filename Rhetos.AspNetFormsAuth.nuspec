@@ -5,7 +5,7 @@
     <version>5.4.0-dev</version>
     <authors>Omega software</authors>
     <owners>Omega software</owners>
-    <licenseUrl>http://opensource.org/licenses/AGPL-3.0</licenseUrl>
+    <license type="expression">AGPL-3.0-only</license>
     <projectUrl>https://github.com/rhetos/rhetos</projectUrl>
     <description>AspNetFormsAuth is a plugin package for Rhetos development platform.
       It provides an implementation of ASP.NET forms authentication to Rhetos server applications.</description>
