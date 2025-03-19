@@ -36,7 +36,7 @@ namespace Rhetos.AspNetFormsAuth.Test
 
         private void ConfigureRhetos(IServiceProvider serviceProvider, IRhetosHostBuilder rhetosHostBuilder)
         {
-            rhetosHostBuilder.UseRootFolder(@"..\..\..\..\Rhetos.AspNetFormsAuth.TestApp\bin\Debug\net5.0");
+            rhetosHostBuilder.UseRootFolder(@"..\..\..\..\Rhetos.AspNetFormsAuth.TestApp\bin\Debug\net8.0");
         }
     }
 }

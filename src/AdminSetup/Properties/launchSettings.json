@@ -3,7 +3,7 @@
     "AdminSetup": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "exec --runtimeconfig \"..\\..\\..\\..\\..\\test\\Rhetos.AspNetFormsAuth.TestApp\\bin\\Debug\\net5.0\\Rhetos.AspNetFormsAuth.TestApp.runtimeconfig.json\" --depsfile \"..\\..\\..\\..\\..\\test\\Rhetos.AspNetFormsAuth.TestApp\\bin\\Debug\\net5.0\\Rhetos.AspNetFormsAuth.TestApp.deps.json\" \"AdminSetup.dll\" ..\\..\\..\\..\\..\\test\\Rhetos.AspNetFormsAuth.TestApp\\bin\\Debug\\net5.0\\Rhetos.AspNetFormsAuth.TestApp.dll --execute-command-in-current-process"
+      "commandLineArgs": "exec --runtimeconfig \"..\\..\\..\\..\\..\\test\\Rhetos.AspNetFormsAuth.TestApp\\bin\\Debug\\net8.0\\Rhetos.AspNetFormsAuth.TestApp.runtimeconfig.json\" --depsfile \"..\\..\\..\\..\\..\\test\\Rhetos.AspNetFormsAuth.TestApp\\bin\\Debug\\net8.0\\Rhetos.AspNetFormsAuth.TestApp.deps.json\" \"AdminSetup.dll\" ..\\..\\..\\..\\..\\test\\Rhetos.AspNetFormsAuth.TestApp\\bin\\Debug\\net8.0\\Rhetos.AspNetFormsAuth.TestApp.dll --execute-command-in-current-process"
     }
   }
 }

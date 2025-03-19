@@ -12,12 +12,14 @@
     <copyright>Copyright Omega software 2015</copyright>
     <tags>Rhetos plugin</tags>
     <dependencies>
-      <dependency id="Rhetos.CommonConcepts" version="5.0.0" />
-      <dependency id="Rhetos.RestGenerator" version="5.0.0" />
-      <dependency id="Rhetos.Host.AspNet" version="5.0.0" />
+      <group targetFramework="net8.0">
+        <dependency id="Rhetos.CommonConcepts" version="5.0.0" />
+        <dependency id="Rhetos.RestGenerator" version="5.0.0" />
+        <dependency id="Rhetos.Host.AspNet" version="5.0.0" />
+      </group>
     </dependencies>
     <frameworkReferences>
-      <group targetFramework="net5.0">
+      <group targetFramework="net8.0">
         <frameworkReference name="Microsoft.AspNetCore.App" />
       </group>
     </frameworkReferences>
@@ -37,13 +39,13 @@
     <file src="src\Rhetos.AspNetFormsAuth\DataMigration\**\*" target="DataMigration" />
     <file src="src\Rhetos.AspNetFormsAuth\DslScripts\**\*" target="DslScripts" />
 
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.dll" target="lib\net5.0" />
-    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net5.0\Rhetos.AspNetFormsAuth.pdb" target="lib\net5.0" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net8.0\Rhetos.AspNetFormsAuth.dll" target="lib\net8.0" />
+    <file src="src\Rhetos.AspNetFormsAuth\bin\Debug\net8.0\Rhetos.AspNetFormsAuth.pdb" target="lib\net8.0" />
 
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.exe" target="contentFiles/any/any/RhetosTools" />
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.dll" target="contentFiles/any/any/RhetosTools" />
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.pdb" target="contentFiles/any/any/RhetosTools" />
-    <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.runtimeconfig.json" target="contentFiles/any/any/RhetosTools" />
+    <file src="src\AdminSetup\bin\Debug\net8.0\AdminSetup.exe" target="contentFiles/any/any/RhetosTools" />
+    <file src="src\AdminSetup\bin\Debug\net8.0\AdminSetup.dll" target="contentFiles/any/any/RhetosTools" />
+    <file src="src\AdminSetup\bin\Debug\net8.0\AdminSetup.pdb" target="contentFiles/any/any/RhetosTools" />
+    <file src="src\AdminSetup\bin\Debug\net8.0\AdminSetup.runtimeconfig.json" target="contentFiles/any/any/RhetosTools" />
     <!-- When invoking AdminSetup.exe, dotnet will search for some dlls (System.Diagnostics.PerformanceCounter.dll) in the output folder
     because the DLL is specified in the AdminSetup.deps.json file
     but an ASP.NET project will not have it because this DLL is located in Microsoft.AspNetCore.App runtime folder and will throw an error.
@@ -52,6 +54,6 @@
     the AdminSetup.exe program will be started by itself with the host application deps.json and runtimeconfig.json files)
     we are omitting the AdminSetup.deps.json file as a workaround so that dotnet will not try to search for this dependency
     instead it will load only assemblies when needed that are located inside the bin folder (for the other assemblies would throw an error). -->
-    <!-- <file src="src\AdminSetup\bin\Debug\net5.0\AdminSetup.deps.json" target="contentFiles/any/any" /> -->
+    <!-- <file src="src\AdminSetup\bin\Debug\net8.0\AdminSetup.deps.json" target="contentFiles/any/any" /> -->
   </files>
 </package>
