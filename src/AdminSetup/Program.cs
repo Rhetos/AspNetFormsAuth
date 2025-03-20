@@ -22,9 +22,9 @@ using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AdminSetup
 {
@@ -51,15 +51,22 @@ namespace AdminSetup
 
         public static int Run(string[] args)
         {
-            var rootCommand = new RootCommand();
-            rootCommand.Add(new Argument<FileInfo>("startup-assembly") { Description = "Startup assembly of the host application." });
-            rootCommand.Add(new Option<string>("--password", "Administrator password."));
-            rootCommand.Add(new Option<bool>("--no-pause", "Don't wait for user input after execution."));
+            Argument<FileInfo> startupAssemblyArgument = new Argument<FileInfo>("startup-assembly") { Description = "Startup assembly of the host application." };
+            Option<string> passwordOption = new Option<string>("--password", "Administrator password.");
+            Option<bool> noPauseOption = new Option<bool>("--no-pause", "Don't wait for user input after execution.");
             //Lack of this switch means that the dbupdate command should start the command rhetos.exe dbupdate
             //in another process with the host applications runtimeconfig.json and deps.json files
-            rootCommand.Add(new Option<bool>(ExecuteCommandInCurrentProcessOptionName) { IsHidden = true });
-            rootCommand.Handler =
-                CommandHandler.Create((FileInfo startupAssembly, string password, bool executeCommandInCurrentProcess) =>
+            Option<bool> currentProcessOption = new Option<bool>(ExecuteCommandInCurrentProcessOptionName) { IsHidden = true };
+
+            var rootCommand = new RootCommand
+            {
+                startupAssemblyArgument,
+                passwordOption,
+                noPauseOption,
+                currentProcessOption
+            };
+
+            rootCommand.SetHandler((FileInfo startupAssembly, string password, bool noPause, bool executeCommandInCurrentProcess) =>
                 {
                     if (executeCommandInCurrentProcess)
                     {
@@ -68,7 +75,8 @@ namespace AdminSetup
                     }
                     else
                         return InvokeAsExternalProcess(startupAssembly.FullName, args);
-                });
+                },
+                startupAssemblyArgument, passwordOption, noPauseOption, currentProcessOption);
 
             return rootCommand.Invoke(args);
         }
@@ -78,11 +86,11 @@ namespace AdminSetup
 		/// .NET version and runtime framework.
 		/// This is need for the utility to be able to use the provided application's object model without issues with missing dependency libraries.
 		/// </summary>
-        private static int InvokeAsExternalProcess(string rhetosHostDllPath, string[] baseArgs)
+        private static Task<int> InvokeAsExternalProcess(string rhetosHostDllPath, string[] baseArgs)
         {
-            var newArgs = new List<string>(baseArgs);
-            newArgs.Add(ExecuteCommandInCurrentProcessOptionName);
-            return Exe.RunWithHostConfiguration(typeof(Program).Assembly.Location, rhetosHostDllPath, newArgs, new ConsoleLogger(EventType.Trace, "AdminSetup"));
+            var newArgs = new List<string>(baseArgs) { ExecuteCommandInCurrentProcessOptionName };
+            var result = Exe.RunWithHostConfiguration(typeof(Program).Assembly.Location, rhetosHostDllPath, newArgs, new ConsoleLogger(EventType.Trace, "AdminSetup"));
+            return Task.FromResult(result);
         }
     }
 }

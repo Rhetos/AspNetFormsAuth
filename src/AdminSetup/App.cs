@@ -30,6 +30,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AdminSetup
 {
@@ -42,9 +43,9 @@ namespace AdminSetup
             _logger = new ConsoleLogger(EventType.Trace, "AdminSetup");
         }
 
-        public int SetUpAdminAccount(string rhetosHostAssemblyPath, string password)
+        public Task<int> SetUpAdminAccount(string rhetosHostAssemblyPath, string password)
         {
-            return SafeExecuteCommand(() =>
+            var result = SafeExecuteCommand(() =>
             {
                 var hostServices = RhetosHost.GetHostServices(
                     rhetosHostAssemblyPath,
@@ -58,6 +59,7 @@ namespace AdminSetup
                     scope.ServiceProvider.GetService<IRhetosComponent<IUnitOfWork>>().Value.CommitAndClose();
                 }
             });
+            return Task.FromResult(result);
         }
 
         private void SetUpAdminAccount(IServiceProvider scope, string password)
