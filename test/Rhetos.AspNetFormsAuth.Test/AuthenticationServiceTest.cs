@@ -303,7 +303,7 @@ namespace Rhetos.AspNetFormsAuth.Test
 
                 serviceScope.ServiceProvider.GetService<IRhetosComponent<IUnitOfWork>>().Value.CommitAndClose();
             }
-            AuthorizationDataCache.ClearCache();
+            AuthorizationDataCache.ClearCacheAll();
         }
 
         const string RandomNamePrefix = "Test__";

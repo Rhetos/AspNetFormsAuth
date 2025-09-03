@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rhetos.CommonConcepts" Version="6.0.0-dev24011711054c6feb" />
-    <PackageReference Include="Rhetos.Host" Version="6.0.0-dev24011711054c6feb" />
-    <PackageReference Include="Rhetos.MSBuild" Version="6.0.0-dev24011711054c6feb" />
-    <PackageReference Include="Rhetos.Host.AspNet" Version="6.0.0-dev24011711054c6feb" />
-    <PackageReference Include="Rhetos.MsSqlEf6" Version="6.0.0-dev24011711054c6feb" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Rhetos.CommonConcepts" Version="6.0.0" />
+    <PackageReference Include="Rhetos.Host" Version="6.0.0" />
+    <PackageReference Include="Rhetos.MSBuild" Version="6.0.0" />
+    <PackageReference Include="Rhetos.Host.AspNet" Version="6.0.0" />
+    <PackageReference Include="Rhetos.MsSqlEf6" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
   </ItemGroup>
 
   <ItemGroup>

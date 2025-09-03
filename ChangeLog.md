@@ -1,5 +1,9 @@
 # Rhetos.AspNetFormsAuth release notes
 
+## 6.0.0 (2025-09-03)
+
+* Update to .NET 8 and Rhetos 6.
+
 ## 5.3.0 (2023-03-16)
 
 * Bugfix: In some cases AdminSetup.exe did could write to the application log file.
